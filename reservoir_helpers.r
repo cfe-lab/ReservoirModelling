@@ -162,3 +162,51 @@ log.likelihood.no.factorial <- function(seq.ages, bin.dist, bin.size) {
     )
     return(sum(log(likelihoods)))
 }
+
+
+fisher.information <- function(decay, bin.freqs) {
+    # Compute the Fisher information for the given reservoir distribution and decay rate.
+    # Note that the unit for decay is the bin size of bin.freqs, *not* necessarily days.
+    n <- length(bin.freqs)
+
+    h <- function(decay) {
+        # This is the normalizing factor for the density.
+        summands <- sapply(
+            seq(1, n),
+            function (j) {
+                bin.freqs[j] * 2^(-(n - j) / decay)
+            }
+        )
+        return(sum(summands))
+    }
+
+    h.prime <- function(theta) { 
+        # This is the derivative of the above.
+        summands <- sapply(
+            seq(1, n),
+            function (j) {
+                bin.freqs[j] * log(2) * (n - j) * 2^(-(n-j) / theta) / theta^2
+            }
+        )
+        return(sum(summands))
+    }
+
+    f <- function(x, theta) {
+        numerator <- bin.freqs[x] * 2^(-(n-x) / theta)
+        return(numerator / h(theta))
+    }
+
+    ll.prime <- function(x, theta) {
+        first.term <- log(2) * (n - x) / theta^2
+        second.term <- h.prime(theta) / h(theta)
+        return(first.term - second.term)
+    }
+
+    # The Fisher information is \E_{\theta}[ (\frac{\partial}{\partial\theta} log f(X|\theta))^2 ],
+    # where X is distributed as f(\cdot|\theta).
+    summands <- sapply(
+        seq(1, n),
+        function (j) f(j, decay) * ll.prime(j, decay)^2
+    )
+    return(sum(summands))
+}

@@ -125,16 +125,33 @@ for (pid in names(all.log.likelihoods)) {
         plot(
             possible.half.lives,
             lls,
-            main=paste("Log likelihoods for subject", pid, "(collection date ", col.date, ") by decay rate"),
+            main=paste(
+                "Log likelihoods by decay rate: ", pid, ", collection date ", col.date,
+                sep=""
+            ),
             xlab="Reservoir half life (days)",
             ylab="Log likelihood"
         )
         abline(v=mle, lty="dashed")
 
+        # We get an estimate of the variance of the MLE via the Fisher information.
+        estimated.variance <- 1 / fisher.information(max.idx, reservoir.dists[[pid]]$bin.freqs)
+
+        lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
+        upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
+        abline(v=lower.bound, lty="dotted")
+        abline(v=upper.bound, lty="dotted")
+
         text(
             x=mle,
             y=sum(range(lls)) / 2,
             labels=paste(mle, "days"),
+            pos=4
+        )
+        text(
+            x=upper.bound,
+            y=min(lls) + (max(lls) - min(lls))/ 4,
+            labels=paste(round(upper.bound, digits=2), "days"),
             pos=4
         )
 
@@ -293,49 +310,49 @@ for (i in 1:length(levels(integration.data$pid))) {
 # For a time period of n days, we first start by getting the undecayed reservoir distribution.
 curr.pid <- "Z1047M"
 reservoir.dist <- reservoir.dists[[curr.pid]]  # domain of the density is {1, |reservoir.dist$bin.freqs|}
-n <- length(reservoir.dist$bin.freqs)
+# n <- length(reservoir.dist$bin.freqs)
 
-h <- function(decay) {
-    # This is the normalizing factor for the density.
-    summands <- sapply(
-        seq(1, n),
-        function (j) {
-            reservoir.dist$bin.freqs[j] * 2^(-(n - j) / decay)
-        }
-    )
-    return(sum(summands))
-}
+# h <- function(decay) {
+#     # This is the normalizing factor for the density.
+#     summands <- sapply(
+#         seq(1, n),
+#         function (j) {
+#             reservoir.dist$bin.freqs[j] * 2^(-(n - j) / decay)
+#         }
+#     )
+#     return(sum(summands))
+# }
 
-h.prime <- function(decay) { 
-    # This is the derivative of the above.
-    summands <- sapply(
-        seq(1, n),
-        function (j) {
-            reservoir.dist$bin.freqs[j] * log(2) * (n - j) * 2^(-(n-j) / decay) / decay^2
-        }
-    )
-    return(sum(summands))
-}
+# h.prime <- function(decay) { 
+#     # This is the derivative of the above.
+#     summands <- sapply(
+#         seq(1, n),
+#         function (j) {
+#             reservoir.dist$bin.freqs[j] * log(2) * (n - j) * 2^(-(n-j) / decay) / decay^2
+#         }
+#     )
+#     return(sum(summands))
+# }
 
-f <- function(x, decay) {
-    numerator <- reservoir.dist$bin.freqs[x] * 2^(-(n-x) / decay)
-    return(numerator / h(decay))
-}
+# f <- function(x, decay) {
+#     numerator <- reservoir.dist$bin.freqs[x] * 2^(-(n-x) / decay)
+#     return(numerator / h(decay))
+# }
 
-ll.prime <- function(x, decay) {
-    first.term <- log(2) * (n - x) / decay^2
-    second.term <- h.prime(decay) / h(decay)
-    return(first.term - second.term)
-}
+# ll.prime <- function(x, decay) {
+#     first.term <- log(2) * (n - x) / decay^2
+#     second.term <- h.prime(decay) / h(decay)
+#     return(first.term - second.term)
+# }
 
-# The Fisher information is \E_{\theta}[ (\frac{\partial}{\partial\theta} log f(X|\theta))^2 ],
-# where X is distributed as f(\cdot|\theta).
-fisher.information <- function(decay) {
-    summands <- sapply(
-        seq(1, n),
-        function (j) {
-            f(j, decay) * ll.prime(j, decay)^2
-        }
-    )
-    return(sum(summands))
-}
+# # The Fisher information is \E_{\theta}[ (\frac{\partial}{\partial\theta} log f(X|\theta))^2 ],
+# # where X is distributed as f(\cdot|\theta).
+# fisher.information <- function(decay) {
+#     summands <- sapply(
+#         seq(1, n),
+#         function (j) {
+#             f(j, decay) * ll.prime(j, decay)^2
+#         }
+#     )
+#     return(sum(summands))
+# }
