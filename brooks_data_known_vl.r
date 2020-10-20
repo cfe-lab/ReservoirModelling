@@ -1,4 +1,4 @@
-brooks.data <- read.csv("BrooksData.csv")[,1:8]
+brooks.data <- read.csv("../data/BrooksData.csv")[,1:8]
 
 names(brooks.data) <- c(
     "pid",
@@ -37,30 +37,77 @@ brooks.data$days.before.art <-
 
 integration.data <- brooks.data[, c(1, 5, 9, 11)]
 
-source("reservoir_helpers.r")
-library(parallel)
 
-reservoir.dists <- list()
-bin.size <- 30
-for (i in 1:length(levels(integration.data$pid))) {
-    curr.pid <- levels(integration.data$pid)[i]
+# Next, read in the VL data.
+vl.data <- read.csv("../data/BrooksDataVLs.csv")
+vl.data <- vl.data[, 1:6]
+names(vl.data) <- c(
+    "pid",
+    "est.infection.date",
+    "vl.date",
+    "vl",
+    "art.start.date",
+    "is.estimated.peak"
+)
 
-    curr.pid.data <- integration.data[integration.data$pid == curr.pid,]
-    days.pre.therapy <- curr.pid.data$untreated.period[1]
-
-    cat("Processing data for PID ", curr.pid, ".\n", sep="")
-    cat("Calculating undecayed distribution of reservoir....\n")
-    run.time <- system.time(
-        reservoir.dist <- undecayed.reservoir.distribution(
-            days.pre.therapy,
-            bin.size=bin.size
-        )
-    )
-    cat("Time elapsed:\n")
-    print(run.time)
-    reservoir.dists[[curr.pid]] <- reservoir.dist
+for (col.idx in c(2, 3, 5)) {
+    vl.data[[col.idx]] <- strptime(vl.data[[col.idx]], "%d-%b-%y")
 }
 
+# For the VL data, we want to convert all of our dates to days after infection.
+# Note that we don't have a *zero* day yet!
+vl.data$days.after.infection <- as.numeric(vl.data$vl.date - vl.data$est.infection.date, units="days")
+
+
+# Solve the ODEs numerically (this is the slow part).
+source("reservoir_helpers.r")
+ode.solutions.bin.30 <- list()
+ode.solutions.bin.365 <- list()
+for (pid in unique(brooks.data$pid)) {
+    pid.sample.data <- brooks.data[brooks.data$pid == pid,]
+    pid.vl.data <- vl.data[vl.data$pid == pid,]
+
+    infection.date <- pid.vl.data$est.infection.date[1]
+    art.initiation <- pid.vl.data$art.start.date[1]
+
+    # Sanity check: for each PID, check that the estimated infection date and cART initiation date match
+    # in both data frames.
+    est.infection.date.matches <- pid.sample.data$est.infection.date[1] == infection.date
+    if (!est.infection.date.matches) {
+        cat("PID", pid, "shows inconsistent infection dates!\n")
+    }
+    art.initiation.matches <- pid.sample.data$art.start.date[1] == art.initiation
+    if (!art.initiation.matches) {
+        cat("PID", pid, "shows inconsistent cART initiation dates!")
+    }
+
+    # Compute the ODE for this individual, and bin the reservoir into 30 day intervals.
+    cat("Solving ODEs for ", curr.pid, ".\n", sep="")
+    ode.solutions.bin.30[[pid]] <- undecayed.reservoir.distribution.given.vl(
+        c(0, pid.vl.data$days.after.infection),
+        c(0, pid.vl.data$vl),
+        infection.date,
+        art.initiation,
+        bin.size=30,
+        grid.size=0.001
+    )
+
+    # Now get the same information binned by 365 days.
+    ode.df <- ode.solutions.bin.30[[pid]]$solution
+    latent.by.bin.365 <- bin.helper(ode.df, bin.size=365, grid.size=0.001)
+    ode.solutions.bin.365[[pid]] <- list(
+        solution=ode.df,
+        bin.freqs=latent.by.bin.365,
+        bin.dist.no.decay=latent.by.bin.365 / sum(latent.by.bin.365)
+    )
+}
+
+save.image("brooks_data_known_vl.RData")
+
+
+# Find the decay rate that maximizes the likelihood for each individual.
+library(parallel)
+bin.size <- 30
 possible.half.lives <- (1:200) * bin.size  # months, roughly
 all.log.likelihoods <- list()  # this will be doubly-indexed by pid and collection date
 
@@ -69,9 +116,8 @@ for (i in 1:length(levels(integration.data$pid))) {
     all.log.likelihoods[[curr.pid]] <- list()
 
     curr.pid.data <- integration.data[integration.data$pid == curr.pid,]
-    days.pre.therapy <- curr.pid.data$untreated.period[1]
 
-    reservoir.dist <- reservoir.dists[[curr.pid]]
+    reservoir.dist <- ode.solutions.bin.30[[curr.pid]]
 
     all.collection.dates <- as.character(unique(curr.pid.data$collection.date))
     for (col.date in all.collection.dates) {
@@ -86,7 +132,6 @@ for (i in 1:length(levels(integration.data$pid))) {
             log.likelihoods.no.factorial <- mclapply(
                 possible.half.lives,
                 function (x) {
-                    cat("Calculating distribution of reservoir with a", x, "day half life....\n")
                     decayed <- decay.distribution(reservoir.dist$bin.freqs, x, bin.size)
                     return(log.likelihood.no.factorial(curr.data$days.before.art, decayed$bin.dist, bin.size))
                 },
@@ -112,8 +157,8 @@ for (i in 1:length(levels(integration.data$pid))) {
     }
 }
 
-save.image("brooks_data.RData")
 
+# Make plots of the decay rate estimates.
 for (pid in names(all.log.likelihoods)) {
     for (col.date in names(all.log.likelihoods[[pid]])) {
         lls <- all.log.likelihoods[[pid]][[col.date]]
@@ -121,12 +166,12 @@ for (pid in names(all.log.likelihoods)) {
         max.idx <- which.max(lls)
         mle <- possible.half.lives[max.idx]
 
-        pdf(paste(pid, "_", col.date,  ".pdf", sep=""))
+        pdf(paste(pid, "_", col.date,  "_known_vl.pdf", sep=""))
         plot(
             possible.half.lives,
             lls,
             main=paste(
-                "Log likelihoods by decay rate: ", pid, ", collection date ", col.date,
+                "LLs (using known VL) by decay rate: ", pid, ", collected ", col.date,
                 sep=""
             ),
             xlab="Reservoir half life (days)",
@@ -135,7 +180,7 @@ for (pid in names(all.log.likelihoods)) {
         abline(v=mle, lty="dashed")
 
         # We get an estimate of the variance of the MLE via the Fisher information.
-        estimated.variance <- 1 / fisher.information(max.idx, reservoir.dists[[pid]]$bin.freqs)
+        estimated.variance <- 1 / fisher.information(max.idx, ode.solutions.bin.30[[pid]]$bin.freqs)
 
         lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
         upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
@@ -160,38 +205,13 @@ for (pid in names(all.log.likelihoods)) {
 }
 
 
-# Make plots where, for each bin, we show:
-# - a barplot showing the number of actual sequences are in that bin
-# - a line for a "hypothetical" reservoir with 44mo decay
-# - a line for a hypothetical reservoir with 140mo decay
-# - a line with the best-fit decay rate
-bin.size = 365
-reservoir.dists.1yr.bins <- list()
-for (i in 1:length(levels(integration.data$pid))) {
-    curr.pid <- levels(integration.data$pid)[i]
-
-    curr.pid.data <- integration.data[integration.data$pid == curr.pid,]
-    days.pre.therapy <- curr.pid.data$untreated.period[1]
-
-    cat("Processing data for PID ", curr.pid, ".\n", sep="")
-    cat("Calculating undecayed distribution of reservoir....\n")
-    run.time <- system.time(
-        reservoir.dist <- undecayed.reservoir.distribution(
-            days.pre.therapy,
-            bin.size=bin.size
-        )
-    )
-    cat("Time elapsed:\n")
-    print(run.time)
-    reservoir.dists.1yr.bins[[curr.pid]] <- reservoir.dist
-}
-
+# Plots of reservoir composition.
 for (i in 1:length(levels(integration.data$pid))) {
     curr.pid <- levels(integration.data$pid)[i]
     curr.pid.data <- integration.data[integration.data$pid == curr.pid,]
     days.pre.therapy <- curr.pid.data$untreated.period[1]
 
-    reservoir.dist <- reservoir.dists.1yr.bins[[curr.pid]]
+    reservoir.dist <- ode.solutions.bin.365[[curr.pid]]
 
     all.collection.dates <- as.character(unique(curr.pid.data$collection.date))
     for (col.date in all.collection.dates) {
@@ -201,13 +221,13 @@ for (i in 1:length(levels(integration.data$pid))) {
         max.idx <- which.max(lls)
         mle <- possible.half.lives[max.idx]
 
-        dist.44mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 44 * 30, bin.size)
-        dist.140mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 140 * 30, bin.size)
-        dist.best.fit <- decay.distribution(reservoir.dist$bin.freqs, mle, bin.size)
+        dist.44mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 44 * 30, 365)
+        dist.140mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 140 * 30, 365)
+        dist.best.fit <- decay.distribution(reservoir.dist$bin.freqs, mle, 365)
 
-        breakpoints = seq(0, max(c(curr.data$days.before.art, days.pre.therapy)), by=bin.size)
+        breakpoints = seq(0, max(c(curr.data$days.before.art, days.pre.therapy)), by=365)
         if (!(max(curr.data$days.before.art) %in% breakpoints)) {
-            breakpoints = c(breakpoints, breakpoints[length(breakpoints)] + bin.size)
+            breakpoints = c(breakpoints, breakpoints[length(breakpoints)] + 365)
         }
         actual.freqs <- hist(
             curr.data$days.before.art,
@@ -218,16 +238,16 @@ for (i in 1:length(levels(integration.data$pid))) {
 
         max.y <- max(c(dist.44mo.decay$bin.dist, dist.140mo.decay$bin.dist, dist.best.fit$bin.dist, emp.dist))
 
-        pdf(paste("composition_", curr.pid, "_", col.date,  ".pdf", sep=""))
+        pdf(paste("composition_", curr.pid, "_", col.date,  "_known_vl.pdf", sep=""))
         par(mar=c(5, 4, 4, 12) + 0.1, xpd=TRUE)
 
         plot(
             c(0, length(emp.dist)),
             c(0, max.y),
             main=paste(
-                "Reservoir composition for ", 
+                "Reservoir composition (VL known) for ", 
                 curr.pid,
-                "\n(collection date ",
+                "\n(collected ",
                 col.date,
                 ")",
                 sep=""
@@ -304,4 +324,3 @@ for (i in 1:length(levels(integration.data$pid))) {
         dev.off()
     }
 }
-

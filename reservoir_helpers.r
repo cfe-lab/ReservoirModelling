@@ -117,6 +117,71 @@ undecayed.reservoir.distribution <- function(
     )
 }
 
+
+undecayed.reservoir.distribution.given.vl <- function(
+    vl.times,  # given as days relative to (estimated) infection date
+    vl.measurements,
+    infection.date,  # date object
+    art.initiation,  # date object
+    bin.size=365, 
+    grid.size=0.001, 
+    maxsteps=25000
+) {
+    virus <- approxfun(vl.times, vl.measurements, rule=2)
+
+    state.vl.known <- state[1:6]
+
+    derivatives.vl.known <- function(t, state, parameters) {
+        with(
+            as.list(c(state, parameters)), 
+            {
+                V <- virus(t)
+
+                dS <- alpha.S - delta.S * S - beta * S * V
+                dA.P <- (1 - lambda) * tau * beta * S * V - delta.I * A.P - kappa * A.P * E
+                dA.U <- (1 - lambda) * (1 - tau) * beta * S * V - delta.I * A.U - kappa * A.U * E
+                dL.P <- lambda * tau * beta * S * V
+                dL.U <- lambda * (1 - tau) * beta * S * V
+                dE <- alpha.E + omega * (A.P + A.U) * E / (E + E.50) - delta.E * E
+
+                return(
+                    list(
+                        c(dS, dA.P, dA.U, dL.P, dL.U, dE),
+                        V=V
+                    )
+                )
+            }
+        )
+    }
+
+    max.time <- as.numeric(art.initiation - infection.date, units="days")
+    times <- seq(0, max.time, by=grid.size)
+
+    run.time <- system.time(
+        vl.known <- ode(
+            y=state.vl.known,
+            times=times,
+            func=derivatives.vl.known,
+            parms=parameters,
+            maxsteps=25000
+        )
+    )
+    cat("Time elapsed:\n")
+    print(run.time)
+
+    out.df <- as.data.frame(vl.known)
+    latent.by.bin <- bin.helper(out.df, bin.size=bin.size, grid.size=grid.size)
+    
+    return(
+        list(
+            solution=out.df,
+            bin.freqs=latent.by.bin,
+            bin.dist.no.decay=latent.by.bin / sum(latent.by.bin)
+        )
+    )
+}
+
+
 decay.distribution <- function(
     latent.by.bin,
     half.life,
@@ -210,3 +275,4 @@ fisher.information <- function(decay, bin.freqs) {
     )
     return(sum(summands))
 }
+
