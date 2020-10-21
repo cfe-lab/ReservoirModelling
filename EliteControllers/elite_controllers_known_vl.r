@@ -11,10 +11,10 @@ subjects <- c("p1", "p2", "p3", "p4")
 
 for (subject in subjects) {
     # The VL CSV file has columns (date, viral.load, comments).
-    vl.csv <- read.csv(paste(subject, "/VL-VL.csv", sep=""))
+    vl.csv <- read.csv(paste("../../data/", subject, "/VL-VL.csv", sep=""))
     vl.csv$date <- strptime(vl.csv$date, "%d/%m/%Y")
 
-    peak.csv <- read.csv(paste(subject, "/Peak-Peak.csv", sep=""))
+    peak.csv <- read.csv(paste("../../data/", subject, "/Peak-Peak.csv", sep=""))
     infection.date <- strptime(peak.csv$est.infection.date[1], "%d/%m/%Y")
     art.initiation <- strptime(peak.csv$art.initiation[1], "%d/%m/%Y")
 
@@ -73,7 +73,7 @@ for (subject in subjects) {
 # Read in the sample time data.
 for (subject in subjects) {
     # The sample times CSV file has 4 useful columns, toss the rest.
-    subject.data <- read.csv(paste(subject, "sample_times.csv", sep="/"))
+    subject.data <- read.csv(paste("../../data/", subject, "sample_times.csv", sep="/"))
     subject.data <- subject.data[, c(1, 4, 5, 6)]
     names(subject.data) <- c(
         "id",
