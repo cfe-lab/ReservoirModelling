@@ -105,7 +105,7 @@ for (subject in subjects) {
 
 
 # Solve the ODEs numerically (this is the slow part).
-source("reservoir_helpers.r")
+source("../reservoir_helpers.r")
 ode.solutions.bin.30 <- list()
 ode.solutions.bin.365 <- list()
 for (subject in subjects) {
