@@ -205,7 +205,7 @@ for (subject in subjects) {
     abline(v=mle, lty="dashed")
 
     # We get an estimate of the variance of the MLE via the Fisher information.
-    estimated.variance <- 1 / fisher.information(max.idx, ode.solutions.bin.30[[pid]]$bin.freqs)
+    estimated.variance <- 1 / fisher.information(max.idx, ode.solutions.bin.30[[subject]]$bin.freqs)
 
     lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
     upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
