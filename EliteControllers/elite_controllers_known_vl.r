@@ -260,7 +260,15 @@ for (subject in subjects) {
     )
     emp.dist <- actual.freqs$counts / sum(actual.freqs$counts)
 
-    max.y <- max(c(dist.44mo.decay$bin.dist, dist.140mo.decay$bin.dist, dist.best.fit$bin.dist, emp.dist))
+    max.y <- max(
+        c(
+            dist.44mo.decay$bin.dist, 
+            dist.140mo.decay$bin.dist, 
+            dist.best.fit$bin.dist, 
+            reservoir.dist$bin.dist.no.decay,
+            emp.dist
+        )
+    )
 
     pdf(paste("composition_", subject, "_known_vl.pdf", sep=""))
     par(mar=c(5, 4, 4, 12) + 0.1, xpd=TRUE)
@@ -295,6 +303,14 @@ for (subject in subjects) {
     )
 
     lines(
+        c(0, seq(length(emp.dist) - length(reservoir.dist$bin.dist.no.decay) + 1, length(emp.dist))),
+        c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
+        type="S",
+        col="orange",
+        lwd=3
+    )
+
+    lines(
         c(0, seq(length(emp.dist) - length(dist.140mo.decay$bin.dist) + 1, length(emp.dist))),
         c(dist.140mo.decay$bin.dist[1], dist.140mo.decay$bin.dist),
         type="S",
@@ -323,17 +339,20 @@ for (subject in subjects) {
         "topright",
         legend=c(
             "empirical",
+            "no decay",
             "140mo decay",
             "44mo decay",
             paste(mle, "day decay", sep="")
         ),
         col=c(
+            "orange",
             "blue",
             "grey",
             "black",
             "green"
         ),
         lty=c(
+            "solid",
             "solid",
             "solid",
             "dotdash",
