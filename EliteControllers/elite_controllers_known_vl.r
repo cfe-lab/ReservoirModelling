@@ -358,7 +358,7 @@ for (subject in subjects) {
             "dotdash",
             "solid"
         ),
-        lwd=c(20, 3, 3, 3),
+        lwd=c(20, 3, 3, 3, 3),
         inset=c(-0.5, 0)
     )
     dev.off()
