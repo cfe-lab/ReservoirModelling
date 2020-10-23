@@ -314,7 +314,7 @@ for (subject in subjects) {
         c(0, seq(length(emp.dist) - length(dist.140mo.decay$bin.dist) + 1, length(emp.dist))),
         c(dist.140mo.decay$bin.dist[1], dist.140mo.decay$bin.dist),
         type="S",
-        col=colour.alpha.helper("grey", alpha=200, max.colour.value=255),
+        col=colour.alpha.helper("grey", alpha=175, max.colour.value=255),
         lwd=3
     )
 
@@ -331,7 +331,7 @@ for (subject in subjects) {
         c(0, seq(length(emp.dist) - length(dist.best.fit$bin.dist) + 1, length(emp.dist))),
         c(dist.best.fit$bin.dist[1], dist.best.fit$bin.dist),
         type="S",
-        col=colour.alpha.helper("green", alpha=200, max.colour.value=255),
+        col=colour.alpha.helper("green", alpha=175, max.colour.value=255),
         lwd=3
     )
 
@@ -345,8 +345,8 @@ for (subject in subjects) {
             paste(mle, "day decay", sep="")
         ),
         col=c(
-            "orange",
             "blue",
+            "orange",
             "grey",
             "black",
             "green"
