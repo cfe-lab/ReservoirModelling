@@ -279,5 +279,5 @@ fisher.information <- function(decay, bin.freqs) {
 
 colour.alpha.helper <- function(colour.name, alpha, max.colour.value = 1) {
     col.rgb <- col2rgb(colour.name)
-    return(col2rgb(col.rgb[1], col.rgb[2], col.rgb[3], alpha=alpha, maxColorValue=max.colour.value))
+    return(rgb(col.rgb[1], col.rgb[2], col.rgb[3], alpha=alpha, maxColorValue=max.colour.value))
 }
