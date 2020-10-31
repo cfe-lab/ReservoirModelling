@@ -363,3 +363,25 @@ for (subject in subjects) {
     )
     dev.off()
 }
+
+
+# For p2, we compute a likelihood ratio/Bayes factor to compare the models with
+# - 6000 day decay
+# - no decay at all
+subject <- "p2"
+curr.data <- all.subjects[[subject]]$integration
+reservoir.dist <- ode.solutions.bin.30[[subject]]
+
+no.decay.ll.no.factorial <- log.likelihood.no.factorial(
+    curr.data$days.before.art,
+    reservoir.dist$bin.dist.no.decay,
+    30
+)
+no.decay.ll <- no.decay.ll.no.factorial + sum(log(1:nrow(curr.data)))
+
+# The maximizer, which was 6000 days.
+lls <- all.log.likelihoods[[subject]]
+max.idx <- which.max(lls)
+max.ll <- lls[max.idx]
+
+bayes.factor <- exp(max.ll - no.decay.ll)
