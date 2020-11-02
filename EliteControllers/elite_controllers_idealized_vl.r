@@ -68,7 +68,7 @@ for (subject in subjects) {
     # Compute the ODE for this individual, and bin the reservoir into 30 day intervals.
     cat("Solving ODEs for ", subject, ".\n", sep="")
     ode.solutions.bin.30[[subject]] <- undecayed.reservoir.distribution(
-        as.numeric(art.initiation - infection.date, units="days")
+        as.numeric(art.initiation - infection.date, units="days"),
         bin.size=30,
         grid.size=0.001
     )
