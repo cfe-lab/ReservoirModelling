@@ -397,3 +397,9 @@ max.idx.idealized <- which.max(lls.idealized)
 max.ll.idealized <- lls.idealized[max.idx.idealized]
 
 bf.idealized.vs.known <- exp(max.ll - max.ll.idealized)
+
+no.decay.ll.idealized <- log.likelihood.no.factorial.idealized(
+    curr.data.idealized$days.before.art,
+    reservoir.dist.idealized$bin.dist.no.decay,
+    30
+)
