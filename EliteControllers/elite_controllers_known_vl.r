@@ -384,4 +384,16 @@ lls <- all.log.likelihoods[[subject]]
 max.idx <- which.max(lls)
 max.ll <- lls[max.idx]
 
-bayes.factor <- exp(max.ll - no.decay.ll)
+bayes.factor <- exp(no.decay.ll - max.ll)
+
+
+# Read in data from the idealized VL analysis.
+load("idealized_results.RData")
+curr.data.idealized <- all.subjects.idealized[[subject]]$integration
+reservoir.dist.idealized <- ode.solutions.bin.30.idealized[[subject]]
+
+lls.idealized <- all.log.likelihoods.idealized[[subject]]
+max.idx.idealized <- which.max(lls.idealized)
+max.ll.idealized <- lls.idealized[max.idx.idealized]
+
+bf.idealized.vs.known <- exp(max.ll - max.ll.idealized)

@@ -312,3 +312,17 @@ for (subject in subjects) {
     )
     dev.off()
 }
+
+
+# Rename and save some of the relevant data so that it can be compared in another script
+# with the known VL data.
+all.subjects.idealized <- all.subjects
+all.log.likelihoods.idealized <- all.log.likelihoods
+ode.solutions.bin.30.idealized <- ode.solutions.bin.30
+
+save(
+    all.subjects.idealized, 
+    all.log.likelihoods.idealized,
+    ode.solutions.bin.30.idealized, 
+    file="idealized_results.RData"
+)
