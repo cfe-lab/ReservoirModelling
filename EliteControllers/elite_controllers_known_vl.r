@@ -402,4 +402,4 @@ no.decay.ll.idealized <- log.likelihood.no.factorial.idealized(
     curr.data.idealized$days.before.art,
     reservoir.dist.idealized$bin.dist.no.decay,
     30
-)
+) + sum(log(1:nrow(curr.data)))
