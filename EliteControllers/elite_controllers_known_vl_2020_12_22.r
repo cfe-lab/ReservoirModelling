@@ -15,10 +15,10 @@ subjects <- c("p1", "p2", "p3", "p4")
 
 for (subject in subjects) {
     # The VL CSV file has columns (date, viral.load, comments).
-    vl.csv <- read.csv(paste("../../data/EliteControllers_2020_12_22/", subject, "/VL-VL.csv", sep=""))
+    vl.csv <- read.csv(paste("../../data/EliteControllers_2020_11_30/", subject, "/VL-VL.csv", sep=""))
     vl.csv$date <- strptime(vl.csv$date, "%d/%m/%Y")
 
-    peak.csv <- read.csv(paste("../../data/EliteControllers_2020_12_22/", subject, "/Peak-Peak.csv", sep=""))
+    peak.csv <- read.csv(paste("../../data/EliteControllers_2020_11_30/", subject, "/Peak-Peak.csv", sep=""))
     infection.date <- strptime(peak.csv$est.infection.date[1], "%d/%m/%Y")
     art.initiation <- strptime(peak.csv$art.initiation[1], "%d/%m/%Y")
 
