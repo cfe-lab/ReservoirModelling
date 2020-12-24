@@ -164,10 +164,10 @@ save.image("elite_controllers_known_vl_2020_12_22.RData")
 
 # Find the decay rate that maximizes the likelihood for each individual.
 # NEW FOR THIS ANALYSIS:
-# look up to 1800 months, which is roughly 100 years.
+# look up to 1800 months, which is roughly 150 years.
 library(parallel)
 bin.size <- 30
-possible.half.lives <- (1:1200) * bin.size  # months, roughly
+possible.half.lives <- (1:1800) * bin.size  # months, roughly
 all.log.likelihoods <- list()  # this will be triply-indexed by pid, regime, and collection date
 
 for (subject in subjects) {
