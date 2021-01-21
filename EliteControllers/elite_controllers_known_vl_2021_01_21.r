@@ -78,7 +78,8 @@ for (subject in subjects) {
             # main=paste("LLs (using known VL) by decay rate: ", subject, " (", regime, " case)", sep=""),
             xlab="Reservoir half life (days)",
             ylab="Log likelihood",
-            cex.axis=3
+            cex.lab=3,
+            cex.axis=2
         )
         abline(v=mle, lty="dashed")
 
@@ -96,14 +97,14 @@ for (subject in subjects) {
             y=sum(range(lls)) / 2,
             labels=paste(mle, "days"),
             pos=4,
-            cex=3
+            cex=2
         )
         text(
             x=upper.bound,
             y=min(lls) + (max(lls) - min(lls))/ 4,
             labels=paste(round(upper.bound, digits=2), "days"),
             pos=4,
-            cex=3
+            cex=2
         )
 
         dev.off()
@@ -171,14 +172,14 @@ for (subject in subjects) {
             ylab="Proportion",
             type="n",
             xaxt="n",
-            cex.axis=3
+            cex.lab=3
         )
 
         axis(
             1,  # this is the x axis
             at=seq(1, length(emp.dist)) - 0.5,
             labels=seq(length(emp.dist), 1, by=-1),
-            cex.axis=3
+            cex.axis=2
         )
 
         lines(
