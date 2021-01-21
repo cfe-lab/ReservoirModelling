@@ -10,7 +10,7 @@ for (subject in subjects) {
         mle <- possible.half.lives[max.idx]
 
         pdf(paste(subject, "_", regime, "_known_vl.pdf", sep=""))
-        par(mar=c(8,7,2,2) + 0.1)
+        par(mar=c(6.5, 6.5, 2, 2) + 0.1)
         plot(
             possible.half.lives,
             lls,
@@ -94,7 +94,7 @@ for (subject in subjects) {
 
         pdf(paste("composition_", subject, "_", regime, "_known_vl.pdf", sep=""))
         # par(mar=c(5, 4, 4, 12) + 0.1, xpd=TRUE)
-        par(mar=c(8,7,2,2) + 0.1)
+        par(mar=c(6.5, 6.5, 2, 2) + 0.1)
 
         plot(
             c(0, length(emp.dist)),
@@ -171,7 +171,7 @@ for (subject in subjects) {
                 "no decay",
                 "140mo decay",
                 "44mo decay",
-                paste("best-fit decay rate (", mle, ")", sep="")
+                paste("best-fit decay rate (", mle, " days)", sep="")
             ),
             col=c(
                 "blue",
