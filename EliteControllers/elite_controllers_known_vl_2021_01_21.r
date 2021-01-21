@@ -72,6 +72,7 @@ for (subject in subjects) {
         mle <- possible.half.lives[max.idx]
 
         pdf(paste(subject, "_", regime, "_known_vl.pdf", sep=""))
+        par(mar=c(8,7,2,2) + 0.1)
         plot(
             possible.half.lives,
             lls,
@@ -156,6 +157,7 @@ for (subject in subjects) {
 
         pdf(paste("composition_", subject, "_", regime, "_known_vl.pdf", sep=""))
         # par(mar=c(5, 4, 4, 12) + 0.1, xpd=TRUE)
+        par(mar=c(8,7,2,2) + 0.1)
 
         plot(
             c(0, length(emp.dist)),
@@ -172,7 +174,8 @@ for (subject in subjects) {
             ylab="Proportion",
             type="n",
             xaxt="n",
-            cex.lab=3
+            cex.lab=3,
+            cex.axis=2
         )
 
         axis(
@@ -252,43 +255,3 @@ for (subject in subjects) {
         dev.off()
     }
 }
-
-
-# # For p2, we compute a likelihood ratio/Bayes factor to compare the models with
-# # - 6000 day decay
-# # - no decay at all
-# subject <- "p2"
-# curr.data <- all.subjects[[subject]]$integration
-# reservoir.dist <- ode.solutions.bin.30[[subject]]
-
-# no.decay.ll.no.factorial <- log.likelihood.no.factorial(
-#     curr.data$days.before.art,
-#     reservoir.dist$bin.dist.no.decay,
-#     30
-# )
-# no.decay.ll <- no.decay.ll.no.factorial + sum(log(1:nrow(curr.data)))
-
-# # The maximizer, which was 6000 days.
-# lls <- all.log.likelihoods[[subject]]
-# max.idx <- which.max(lls)
-# max.ll <- lls[max.idx]
-
-# bayes.factor <- exp(no.decay.ll - max.ll)
-
-
-# # Read in data from the idealized VL analysis.
-# load("idealized_results.RData")
-# curr.data.idealized <- all.subjects.idealized[[subject]]$integration
-# reservoir.dist.idealized <- ode.solutions.bin.30.idealized[[subject]]
-
-# lls.idealized <- all.log.likelihoods.idealized[[subject]]
-# max.idx.idealized <- which.max(lls.idealized)
-# max.ll.idealized <- lls.idealized[max.idx.idealized]
-
-# bf.idealized.vs.known <- exp(max.ll - max.ll.idealized)
-
-# no.decay.ll.idealized <- log.likelihood.no.factorial(
-#     curr.data.idealized$days.before.art,
-#     reservoir.dist.idealized$bin.dist.no.decay,
-#     30
-# ) + sum(log(1:nrow(curr.data)))
