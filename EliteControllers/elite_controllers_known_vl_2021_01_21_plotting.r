@@ -15,8 +15,8 @@ for (subject in subjects) {
             possible.half.lives,
             lls,
             # main=paste("LLs (using known VL) by decay rate: ", subject, " (", regime, " case)", sep=""),
-            xlab="Reservoir half life (days)",
-            ylab="Log likelihood",
+            xlab=NA,
+            ylab=NA,
             cex.lab=3,
             cex.axis=2
         )
