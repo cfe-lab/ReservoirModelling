@@ -116,6 +116,11 @@ for (subject in subjects) {
             cex.lab=3,
             cex.axis=2
         )
+        title(
+            xlab="Year prior to ART initiation",
+            ylab="Proportion",
+            line=2.5
+        )
 
         axis(
             1,  # this is the x axis
