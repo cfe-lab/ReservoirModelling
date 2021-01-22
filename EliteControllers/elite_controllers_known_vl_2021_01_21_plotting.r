@@ -36,14 +36,16 @@ for (subject in subjects) {
             y=sum(range(lls)) / 2,
             labels=paste(mle, "days"),
             pos=4,
-            cex=2
+            cex=2,
+            offset=0.1
         )
         text(
             x=upper.bound,
             y=min(lls) + (max(lls) - min(lls))/ 4,
             labels=paste(round(upper.bound, digits=2), "days"),
             pos=4,
-            cex=2
+            cex=2,
+            offset=0.1
         )
 
         dev.off()
@@ -187,7 +189,8 @@ for (subject in subjects) {
                 "dotdash",
                 "solid"
             ),
-            lwd=c(20, 3, 3, 3, 3)
+            lwd=c(20, 3, 3, 3, 3),
+            cex=1.25
         )
         dev.off()
     }
