@@ -109,8 +109,8 @@ for (subject in subjects) {
             #     " case)",
             #     sep=""
             # ),
-            xlab="Year prior to ART initiation",
-            ylab="Proportion",
+            # xlab="Year prior to ART initiation",
+            # ylab="Proportion",
             type="n",
             xaxt="n",
             cex.lab=3,
@@ -119,7 +119,8 @@ for (subject in subjects) {
         title(
             xlab="Year prior to ART initiation",
             ylab="Proportion",
-            line=2.5
+            line=2.5,
+            cex.lab=3
         )
 
         axis(
