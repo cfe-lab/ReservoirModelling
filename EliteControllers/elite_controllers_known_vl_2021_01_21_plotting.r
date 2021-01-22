@@ -38,11 +38,16 @@ for (subject in subjects) {
         abline(v=lower.bound, lty="dotted")
         abline(v=upper.bound, lty="dotted")
 
+        position <- 4
+        if (subject == "p2") {
+            position <- 2
+        }
+
         text(
             x=mle,
             y=sum(range(lls)) / 2,
             labels=paste(mle, "days"),
-            pos=4,
+            pos=position,
             cex=2,
             offset=0.05
         )
@@ -50,7 +55,7 @@ for (subject in subjects) {
             x=upper.bound,
             y=min(lls) + (max(lls) - min(lls))/ 4,
             labels=paste(round(upper.bound, digits=2), "days"),
-            pos=4,
+            pos=position,
             cex=2,
             offset=0.05
         )
