@@ -20,6 +20,13 @@ for (subject in subjects) {
             cex.lab=3,
             cex.axis=2
         )
+
+        title(
+            xlab="Reservoir half life (days)",
+            ylab="Log likelihood",
+            line=3.5,
+            cex.lab=3
+        )
         abline(v=mle, lty="dashed")
 
         # We get an estimate of the variance of the MLE via the Fisher information.
@@ -37,7 +44,7 @@ for (subject in subjects) {
             labels=paste(mle, "days"),
             pos=4,
             cex=2,
-            offset=0.1
+            offset=0.05
         )
         text(
             x=upper.bound,
@@ -45,7 +52,7 @@ for (subject in subjects) {
             labels=paste(round(upper.bound, digits=2), "days"),
             pos=4,
             cex=2,
-            offset=0.1
+            offset=0.05
         )
 
         dev.off()
