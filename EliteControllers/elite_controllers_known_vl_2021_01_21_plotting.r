@@ -1,7 +1,18 @@
 # load("elite_controllers_known_vl_2021_01_21.RData")
-
+library(plotrix)
 
 # Make plots of the decay rate estimates.
+gaps <- list()
+x.tick.marks <- list()
+gaps[["p1"]] <- c(3000, 48000)
+gaps[["p2"]] <- c(3000, 48000)
+gaps[["p3"]] <- c(4000, 48000)
+gaps[["p4"]] <- c(4000, 48000)
+for (subject in subjects) {
+    gaps[[subject]] <- c(4500, 47500)
+    x.tick.marks[[subject]] <- c(seq(0, 4000, 1000), seq(48000, max(possible.half.lives), 1000))
+}
+
 for (subject in subjects) {
     for (regime in regimes) {
         lls <- all.log.likelihoods[[subject]][[regime]]
@@ -9,17 +20,28 @@ for (subject in subjects) {
         max.idx <- which.max(lls)
         mle <- possible.half.lives[max.idx]
 
+        # Filter out values in the plot gap.
+        plot.gap <- gaps[[subject]]
+        plot.indices <- possible.half.lives < plot.gap[1] | possible.half.lives > plot.gap[2] + 250
+
         pdf(paste(subject, "_", regime, "_known_vl.pdf", sep=""))
         par(mar=c(6.5, 6.5, 2, 2) + 0.1)
-        plot(
-            possible.half.lives,
-            lls,
+        gap.plot(
+            possible.half.lives[plot.indices],
+            lls[plot.indices],
+            gap=plot.gap,
+            gap.axis="x",
             # main=paste("LLs (using known VL) by decay rate: ", subject, " (", regime, " case)", sep=""),
             xlab=NA,
             ylab=NA,
             cex.lab=3,
-            cex.axis=2
+            cex.axis=2,
+            xtics=x.tick.marks[[subject]],
+            xticlab=x.tick.marks[[subject]]
         )
+        axis.break(1, plot.gap[1], breakcol="snow", style="gap")
+        axis.break(1, plot.gap[1] * (1.02), breakcol="black", style="slash")
+        axis.break(3, plot.gap[1] * (1.02), breakcol="black", style="slash")
 
         title(
             xlab="Reservoir half life (days)",
@@ -27,7 +49,12 @@ for (subject in subjects) {
             line=3.5,
             cex.lab=3
         )
-        abline(v=mle, lty="dashed")
+        # Some special handling if the MLE is bigger than where we put the gap.
+        mle.plot <- mle
+        if (mle > plot.gap[2]) {
+            mle.plot <- mle - (plot.gap[2] - plot.gap[1])
+        }
+        abline(v=mle.plot, lty="dashed")
 
         # We get an estimate of the variance of the MLE via the Fisher information.
         estimated.variance <- 
@@ -36,7 +63,13 @@ for (subject in subjects) {
         lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
         upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
         abline(v=lower.bound, lty="dotted")
-        abline(v=upper.bound, lty="dotted")
+
+        # Some special handling if the upper bound is bigger than where we put the gap.
+        upper.bound.plot <- upper.bound
+        if (upper.bound > plot.gap[2]) {
+            upper.bound.plot <- upper.bound - (plot.gap[2] - plot.gap[1])
+        }
+        abline(v=upper.bound.plot, lty="dotted")
 
         position <- 4
         if (subject == "p2") {
@@ -44,20 +77,21 @@ for (subject in subjects) {
         }
 
         text(
-            x=mle,
+            x=mle.plot,
             y=sum(range(lls)) / 2,
             labels=paste(mle, "days"),
             pos=position,
             cex=2,
-            offset=0.05
+            offset=0.1
         )
+
         text(
-            x=upper.bound,
+            x=upper.bound.plot,
             y=min(lls) + (max(lls) - min(lls))/ 4,
             labels=paste(round(upper.bound, digits=2), "days"),
             pos=position,
             cex=2,
-            offset=0.05
+            offset=0.1
         )
 
         dev.off()
@@ -191,7 +225,7 @@ for (subject in subjects) {
                 "no decay",
                 "140mo decay",
                 "44mo decay",
-                paste("best-fit decay rate (", mle, " days)", sep="")
+                paste("best-fit decay (", mle, " days)", sep="")
             ),
             col=c(
                 "blue",
@@ -208,7 +242,8 @@ for (subject in subjects) {
                 "solid"
             ),
             lwd=c(20, 3, 3, 3, 3),
-            cex=1.25
+            cex=1.5,
+            bty="n"
         )
         dev.off()
     }
