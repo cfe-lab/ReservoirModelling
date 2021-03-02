@@ -31,7 +31,7 @@ for (subject in subjects) {
     infection.date <- strptime(peak.csv$est.infection.date[1], "%d/%m/%Y")
     art.initiation <- strptime(peak.csv$art.initiation[1], "%d/%m/%Y")
     # Implement special handling for p3.
-    if (subject = "p3") {
+    if (subject == "p3") {
         art.initiation <- strptime("15/11/2013", "%d/%m/%Y")  # this is the time of the blip
 
         undetectable.before.blip <- (
