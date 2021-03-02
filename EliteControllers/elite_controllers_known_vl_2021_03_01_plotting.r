@@ -147,9 +147,15 @@ for (subject in subjects) {
         # par(mar=c(5, 4, 4, 12) + 0.1, xpd=TRUE)
         par(mar=c(6.5, 6.5, 2, 2) + 0.1)
 
+        # Some customization for p3.
+        y.limits <- c(0, max.y)
+        if (subject == "p3") {
+            y.limits[2] <- max.y + 0.05
+        }
+
         plot(
             c(0, length(emp.dist)),
-            c(0, max.y),
+            y.limits,
             # main=paste(
             #     "Reservoir composition (VL known) for ", 
             #     subject,
