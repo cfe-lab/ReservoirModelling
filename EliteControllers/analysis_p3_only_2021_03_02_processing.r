@@ -35,7 +35,7 @@ for (subject in subjects) {
         art.initiation <- strptime("15/11/2013", "%d/%m/%Y")  # this is the time of the blip
 
         undetectable.before.blip <- (
-            vl.csv$comments == "Undetectable" &
+            vl.csv$comments == " Undetectable" &
             vl.csv$date < art.initiation
         ) 
         vl.csv$viral.load[undetectable.before.blip] <- 0

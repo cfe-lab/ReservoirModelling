@@ -173,7 +173,7 @@ for (subject in subjects) {
         )
         title(
             xlab="Year prior to ART initiation",
-            ylab="Proportion",
+            ylab="Provirus proportion",
             line=3.5,
             cex.lab=3
         )
