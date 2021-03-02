@@ -111,8 +111,12 @@ for (subject in subjects) {
 
 # Read in the sample time data.
 for (subject in subjects) {
+    sample.times.base.path <- "../../data"
+    if (subject == "p3") {
+        sample.times.base.path <- paste(sample.times.base.path, "EliteControllers_2021_03_01", sep="/")
+    }
     # The sample times CSV file has 4 useful columns, toss the rest.
-    subject.data <- read.csv(paste("../../data/", subject, "sample_times.csv", sep="/"))
+    subject.data <- read.csv(paste(sample.times.base.path, subject, "sample_times.csv", sep="/"))
     subject.data <- subject.data[, c(1, 4, 5, 6)]
     names(subject.data) <- c(
         "id",
