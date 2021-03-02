@@ -90,7 +90,7 @@ for (subject in subjects) {
             )
         } else {
             text(
-                x=51000,
+                x=51000 - (plot.gap[2] - plot.gap[1]),
                 y=sum(range(lls)) / 2,
                 labels="best fit achieved\nwith no decay",
                 cex=2
