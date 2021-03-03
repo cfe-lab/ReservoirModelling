@@ -39,7 +39,14 @@ for (subject in subjects) {
         )
         all.regressions[[subject]][[regime]] <- decay.rate.regression
 
+        # As per this link:
+        # http://biometry.github.io/APES/Stats/stats23-GeneralizedLinearModels-GLM.html
+        # there is *some* evidence of overdispersion in this fit, but not as decisive
+        # as in the example.
+
         # Make some plots of the regressions.
+        # The error bars were computed with the guidance of this helpful blog post: 
+        # https://www.r-bloggers.com/2018/12/confidence-intervals-for-glms/
         fit <- predict(decay.rate.regression, se.fit=TRUE)
 
         predictions <- exp(fit$fit)
