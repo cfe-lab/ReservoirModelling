@@ -48,10 +48,10 @@ for (subject in subjects) {
 
         max.y <- max(c(actual.freqs$counts, upper.bounds))
 
-        pdf(paste("model_free_decay_rate_", subject, "_", regime, "_known_vl.pdf", sep=""))
+        pdf(paste("model_free_decay_rate_", subject, ".pdf", sep=""))
         par(mar=c(6.5, 6.5, 2, 2) + 0.1)
         plot(
-            c(0, length(actual.freqs$counts)),
+            c(1, length(actual.freqs$counts)),
             c(0, max.y),
             xlab=NA,
             ylab=NA,
@@ -97,7 +97,8 @@ for (subject in subjects) {
             y0=lower.bounds,
             y1=upper.bounds,
             code=3,
-            angle=90
+            angle=90,
+            length=0.125
         )
         dev.off()
     }
