@@ -150,9 +150,11 @@ for (subject in subjects) {
         # Some defaults, and then some customization for p3.
         y.limits <- c(0, max.y)
         x.label <- "Year prior to ART initiation"
+        x.label.cex <- 3
         if (subject == "p3") {
-            y.limits[2] <- max.y + 0.05
+            y.limits[2] <- max.y + 0.175
             x.label <- "Year prior to last viremic episode"
+            x.label.cex <- 2.25
         }
 
         plot(
@@ -176,7 +178,12 @@ for (subject in subjects) {
 
         title(
             xlab=x.label,
-            ylab="Proportion",
+            line=3.5,
+            cex.lab=x.label.cex
+        )
+
+        title(
+            ylab="Provirus proportion",
             line=3.5,
             cex.lab=3
         )
@@ -194,7 +201,7 @@ for (subject in subjects) {
             type="h",
             lwd=20,
             col="blue",
-            lend="square"
+            lend="butt"
         )
 
         if (subject != "p2") {

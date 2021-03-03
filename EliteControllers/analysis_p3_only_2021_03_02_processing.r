@@ -156,7 +156,7 @@ for (subject in subjects) {
             1:length(subject.data$days.before.art),
             function (idx) {
                 int.date <- subject.data$integration.date.est[idx]
-                if (int.date <= real.art.initiation || x >= blip) {
+                if (int.date <= real.art.initiation || int.date >= blip) {
                     return(subject.data$days.before.art[idx])
                 }
 
