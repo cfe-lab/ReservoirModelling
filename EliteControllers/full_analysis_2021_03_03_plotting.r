@@ -6,8 +6,8 @@ library(plotrix)
 gaps <- list()
 x.tick.marks <- list()
 for (subject in subjects) {
-    gaps[[subject]] <- c(4500, 47500)
-    x.tick.marks[[subject]] <- c(seq(0, 4000, 1000), seq(48000, max(possible.half.lives), 1000))
+    gaps[[subject]] <- c(6500, 49500)
+    x.tick.marks[[subject]] <- c(seq(0, 6000, 1000), seq(50000, max(possible.half.lives), 1000))
 }
 
 for (subject in subjects) {
@@ -152,7 +152,7 @@ for (subject in subjects) {
         x.label <- "Year prior to ART initiation"
         x.label.cex <- 3
         if (subject == "p3") {
-            y.limits[2] <- max.y + 0.175
+            y.limits[2] <- max.y + 0.2
             x.label <- "Year prior to last viremic episode"
             x.label.cex <- 2.25
         }

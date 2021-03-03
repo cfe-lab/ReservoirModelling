@@ -53,7 +53,7 @@ for (subject in subjects) {
     if (subject == "p3") {
         p3.art.initiation <- art.initiation
         viremic <- which(vl.csv$comments != " Undetectable")
-        p3.blip <- vl.csv$date[viremic[length(viremic)]]]
+        p3.blip <- vl.csv$date[viremic[length(viremic)]]
         art.initiation <- p3.blip
 
         undetectable.before.blip <- (
