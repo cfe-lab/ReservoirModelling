@@ -191,7 +191,7 @@ for (subject in subjects) {
             type="h",
             lwd=20,
             col="blue",
-            lend="square"
+            lend="butt"
         )
 
         if (subject != "p2") {

@@ -29,10 +29,14 @@ for (subject in subjects) {
             plot=FALSE
         )
 
-        counts.by.year <- rev(actual.freqs$counts)
+        regression.frame <- data.frame(
+            x=1:length(actual.freqs$counts),
+            y=actual.freqs$counts
+        )
         decay.rate.regression <- glm(
-            actual.freqs$counts ~ 1:length(counts.by.year),
-            family=poisson
+            y ~ x,
+            family=poisson,
+            data=regression.frame
         )
         all.regressions[[subject]][[regime]] <- decay.rate.regression
     }
