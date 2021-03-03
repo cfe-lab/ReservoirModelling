@@ -40,25 +40,6 @@ for (subject in subjects) {
             vl.csv$date < art.initiation
         ) 
         vl.csv$viral.load[undetectable.before.blip] <- 0
-
-        # If any proviruses date to the interval between the actual cART initiation and the
-        # time of the blip, change them to the closer of the two (from manual inspection,
-        # all of their 95% CIs contain both dates anyway so this is not *completely* unfounded).
-        vl.csv$date <- sapply(
-            vl.csv$date,
-            function (x) {
-                if (x <= real.art.initiation || x >= art.initiation) {
-                    return(x)
-                }
-                days.after.initiation <- as.numeric(x - real.art.initiation)
-                days.before.blip <- as.numeric(art.initiation - x)
-
-                if (days.after.initiation <= days.before.blip) {
-                    return(real.art.initiation)
-                }
-                return(art.initiation)
-            }
-        )
     }
 
     all.subjects[[subject]] <- list(
@@ -162,6 +143,35 @@ for (subject in subjects) {
                 return(0)
             }
         )
+
+    # Special handling for p3.
+    if (subject == "p3") {
+        real.art.initiation <- strptime("2012/1/1", "%Y/%m/%d")
+        blip <- strptime("2013/11/15", "%Y/%m/%d")
+        # If any proviruses date to the interval between the actual cART initiation and the
+        # time of the blip, change them to the closer of the two (from manual inspection,
+        # all of their 95% CIs contain both dates anyway so this is not *completely* unfounded).
+
+        subject.data$days.before.art <- sapply(
+            1:length(subject.data$days.before.art),
+            function (idx) {
+                int.date <- subject.data$integration.date.est[idx]
+                if (int.date <= real.art.initiation || x >= blip) {
+                    return(subject.data$days.before.art[idx])
+                }
+
+                days.after.initiation <- as.numeric(int.date - real.art.initiation)
+                days.before.blip <- as.numeric(blip - int.date)
+
+                if (days.after.initiation <= days.before.blip) {
+                    return(as.numeric(blip - real.art.initiation))
+                } else {
+                    return(0)
+                }
+
+            }
+        )
+    }
 
     all.subjects[[subject]][["integration"]] <- subject.data
 }
