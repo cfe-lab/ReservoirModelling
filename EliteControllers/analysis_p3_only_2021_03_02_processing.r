@@ -32,6 +32,7 @@ for (subject in subjects) {
     art.initiation <- strptime(peak.csv$art.initiation[1], "%d/%m/%Y")
     # Implement special handling for p3.
     if (subject == "p3") {
+        real.art.initiation <- art.initiation
         art.initiation <- strptime("15/11/2013", "%d/%m/%Y")  # this is the time of the blip
 
         undetectable.before.blip <- (
@@ -39,6 +40,25 @@ for (subject in subjects) {
             vl.csv$date < art.initiation
         ) 
         vl.csv$viral.load[undetectable.before.blip] <- 0
+
+        # If any proviruses date to the interval between the actual cART initiation and the
+        # time of the blip, change them to the closer of the two (from manual inspection,
+        # all of their 95% CIs contain both dates anyway so this is not *completely* unfounded).
+        vl.csv$date <- sapply(
+            vl.csv$date,
+            function (x) {
+                if (x <= real.art.initiation || x >= art.initiation) {
+                    return(x)
+                }
+                days.after.initiation <- as.numeric(x - real.art.initiation)
+                days.before.blip <- as.numeric(art.initiation - x)
+
+                if (days.after.initiation <= days.before.blip) {
+                    return(real.art.initiation)
+                }
+                return(art.initiation)
+            }
+        )
     }
 
     all.subjects[[subject]] <- list(
