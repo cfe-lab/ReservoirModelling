@@ -47,7 +47,7 @@ for (subject in subjects) {
         # Make some plots of the regressions.
         # The error bars were computed with the guidance of this helpful blog post: 
         # https://www.r-bloggers.com/2018/12/confidence-intervals-for-glms/
-        x.fit.values <- data.frame(x=seq(0.5, length(actual.freqs$counts) + 0.5, 0.1))
+        x.fit.values <- data.frame(x=seq(0.5, length(actual.freqs$counts) + 0.5, by=0.1))
         fit <- predict(decay.rate.regression, newdata=x.fit.values, se.fit=TRUE)
 
         predictions <- exp(fit$fit)
@@ -56,8 +56,12 @@ for (subject in subjects) {
 
         total.count <- sum(actual.freqs$counts)
         max.y <- max(c(actual.freqs$counts, upper.bounds)) / total.count
+        # Some customization for p2.
+        if (subject == "p2") {
+            max.y <- max.y + 0.075
+        }
 
-        pdf(paste("model_free_decay_rate_", subject, ".pdf", sep=""))
+        cairo_pdf(paste("model_free_decay_rate_", subject, ".pdf", sep=""))
         par(mar=c(6.5, 6.5, 2, 2) + 0.1)
         plot(
             c(0, length(actual.freqs$counts)),
@@ -109,25 +113,56 @@ for (subject in subjects) {
 
         # Overlay the GLM fitted value and error bars.
         lines(
-            x.fit.values$x,
+            rev(x.fit.values$x) - 0.5,
             predictions / total.count,
             lwd=4,
             col="red"
         )
         lines(
-            x.fit.values$x,
+            rev(x.fit.values$x) - 0.5,
             upper.bounds / total.count,
             lty=2,
             lwd=2,
             col="red"
         )
         lines(
-            x.fit.values$x,
+            rev(x.fit.values$x) - 0.5,
             lower.bounds / total.count,
             lty=2,
             lwd=2,
             col="red"
         )
+
+        # Add text listing the half life.
+        decay.rate.summary <- summary(decay.rate.regression)
+        x.coef <- decay.rate.summary$coefficients[2, 1]
+        x.se <- decay.rate.summary$coefficients[2, 2]
+        
+        # t_{1/2} = - log(2) / x.coef
+        half.life <- - log(2) / x.coef
+        half.life.upper <- "\u221e"
+        if (x.coef + 1.96 * x.se < 0) {
+            half.life.upper <- round(- log(2) / (x.coef + 1.96 * x.se), digits=2)
+        }
+        half.life.lower <- - log(2) / (x.coef - 1.96 * x.se)
+
+        text(
+            x=0,
+            y=max.y * 0.90,
+            label=paste(
+                "Half-life ",
+                round(half.life, digits=2),
+                " years\n(95% CI (",
+                round(half.life.lower, digits=2),
+                ", ",
+                half.life.upper,  # we either already rounded it, or it's the infinity symbol
+                "))",
+                sep=""
+            ),
+            pos=4,
+            cex=2
+        )
+ 
         dev.off()
     }
 }
