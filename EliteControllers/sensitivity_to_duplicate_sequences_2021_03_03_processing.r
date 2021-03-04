@@ -11,7 +11,7 @@ acute.phase[["Miura"]] <- list(
     peak.vl=53300,
     days.to.undetectable=41
 )
-regimes <- c("min", "median", "max", "Miura")
+regimes <- "Miura"
 
 # Read in the data.
 all.subjects <- list()
