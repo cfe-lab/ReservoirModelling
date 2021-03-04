@@ -1,0 +1,27 @@
+\documentclass{article}
+\begin{document}
+To estimate the reservoir half life directly from the observed proviral sequences, we first binned the proviral sequences by their age (from 0 years old to 1 year old; from 1 year old to 2 years old; etc).  We will refer to the bin containing proviruses from $t-1$ to $t$ years old as "bin $t$".  We make the simplifying assumptions that all proviruses in bin $t$ are exactly $t$ years old, and that the proviral reservoir is seeded at a constant rate, i.e. without any regard to viral dynamics.
+
+We then applied a Poisson generalized linear model with the canonical $\ln$ link function to the binned counts.  This choice can be justified as follows.  Let $t_{1/2}$ be the proviral half-life.  Assuming the participant's proviral reservoir decays at an exponential rate, we would expect that the size of bin $t$ would be approximately
+
+\[
+\lfloor C \exp(-\theta t) \rfloor
+\]
+
+where $C$ represents the initial size of the age bin as if there was no decay, and $\theta = ln(2) / t_{1/2}$.
+
+Now, we assume that every provirus has the same small independent probability $p$ of being observed through sampling, extraction, and sequencing.  If this is the case, we would then expect the number of observed proviruses from bin $t$ to be binomially distributed with $\lfloor C \exp(-\theta t) \rfloor$ trials and success probability $p$.  As we assume that $p$ is small, we can thus approximate the distribution with a Poisson distribution with parameter
+
+\[
+\lambda = Cp \exp(-\theta t) = \exp(D - \theta t)
+\]
+
+or in other words
+
+\[
+\ln \lambda = D - \theta t
+\]
+
+where $D = \ln(Cp)$.  This is thus precisely the setup required for the aforementioned Poisson generalized linear model with $\ln$ link function.
+\end{document}
+
