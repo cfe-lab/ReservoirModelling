@@ -249,12 +249,14 @@ for (subject in subjects) {
             )
         }
 
+        # Convert the MLE from days to years.  Our definition of a "year" is simply
+        # 365 days (i.e. we ignored leap years).
         legend.captions <- c(
             "observed",
             "no decay",
             "140mo decay",
             "44mo decay",
-            paste("best-fit decay (", mle, " days)", sep="")
+            paste("best-fit decay (", round(mle / 365, digits=2), " years)", sep="")
         )
         legend.colours <- c(
             "blue",
