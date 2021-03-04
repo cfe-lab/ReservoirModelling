@@ -60,6 +60,7 @@ for (subject in subjects) {
         if (subject == "p2") {
             max.y <- max.y + 0.075
         }
+        max.y <- min(1, max.y)
 
         cairo_pdf(paste("model_free_decay_rate_", subject, ".pdf", sep=""))
         par(mar=c(6.5, 6.5, 2, 2) + 0.1)
@@ -76,10 +77,9 @@ for (subject in subjects) {
 
         # Some defaults, and then some customization for p3.
         x.label <- "Year prior to ART initiation"
-        x.label.cex <- 3
+        x.label.cex <- 2.25
         if (subject == "p3") {
             x.label <- "Year prior to last viremic episode"
-            x.label.cex <- 2.25
         }
 
         title(

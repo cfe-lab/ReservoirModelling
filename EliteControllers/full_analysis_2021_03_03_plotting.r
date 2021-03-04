@@ -150,11 +150,10 @@ for (subject in subjects) {
         # Some defaults, and then some customization for p3.
         y.limits <- c(0, max.y)
         x.label <- "Year prior to ART initiation"
-        x.label.cex <- 3
+        x.label.cex <- 2.25
         if (subject == "p3") {
             y.limits[2] <- max.y + 0.2
             x.label <- "Year prior to last viremic episode"
-            x.label.cex <- 2.25
         }
 
         plot(
