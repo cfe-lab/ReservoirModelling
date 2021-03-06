@@ -71,6 +71,7 @@ for (subject in subjects) {
             ylab=NA,
             type="n",
             xaxt="n",
+            yaxt="n",
             cex.lab=3,
             cex.axis=2
         )
@@ -100,6 +101,19 @@ for (subject in subjects) {
             labels=seq(length(actual.freqs$counts), 1, by=-1),
             cex.axis=2
         )
+        # Special handling for the y axis of p2.
+        if (subject != "p2") {
+            axis(2, cex.axis=2)
+        } else {
+            mark.values=seq(0, 0.3, by=0.1)
+            axis(
+                2,
+                at=mark.values,
+                labels=as.character(mark.values),
+                cex.axis=2
+            )
+        }
+
 
         # Plot the actual observed counts.
         lines(
