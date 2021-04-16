@@ -168,7 +168,7 @@ for (num.untreated.years in c(3, 7)) {
         x.coords,
         c(dist.180day.decay$bin.dist[1], dist.180day.decay$bin.dist),
         type="S",
-        col="green",
+        col="red",
         lwd=3
     )
 
@@ -183,7 +183,7 @@ for (num.untreated.years in c(3, 7)) {
         "purple",
         "grey",
         "black",
-        "green"
+        "red"
     )
     legend.ltys <- c(
         "solid",

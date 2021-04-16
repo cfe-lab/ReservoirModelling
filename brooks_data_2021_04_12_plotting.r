@@ -70,6 +70,14 @@ for (vl.info in c("known", "typical")) {
 
 
 # Plots of reservoir composition.
+# The colour scheme:
+# seroconversion     #BA2A19
+# 1 Year             #000000
+# Last ART-naive     #1332F5
+# ART 1              #5581B0
+# ART 2              #74DCD0
+art.1.colour <- "#5581B0"
+art.2.colour <- "#74DCD0"
 for (vl.info in c("known", "typical")) {
     for (pid in names(all.log.likelihoods[[vl.info]])) {
         curr.pid.data <- integration.data[integration.data$pid == pid,]
@@ -155,7 +163,7 @@ for (vl.info in c("known", "typical")) {
                     emp.dist,
                     type="h",
                     lwd=20,
-                    col="blue",
+                    col=art.1.colour,
                     lend="butt"
                 )
             } else {
@@ -196,7 +204,7 @@ for (vl.info in c("known", "typical")) {
                     first.freqs$counts / total,
                     type="h",
                     lwd=20,
-                    col="steelblue",
+                    col=art.1.colour,
                     lend="butt"
                 )
 
@@ -206,7 +214,7 @@ for (vl.info in c("known", "typical")) {
                     y0=first.freqs$counts / total,
                     y1=(first.freqs$counts + last.freqs$counts) / total,
                     lwd=20,
-                    col="turquoise",
+                    col=art.2.colour,
                     lend="butt"
                 )
             }
@@ -232,13 +240,13 @@ for (vl.info in c("known", "typical")) {
                 c(0, seq(length(emp.dist) - length(dist.best.fit$bin.dist) + 1, length(emp.dist))),
                 c(dist.best.fit$bin.dist[1], dist.best.fit$bin.dist),
                 type="S",
-                col="green",
+                col="red",
                 lwd=3
             )
 
             # Build up the legend, with some customization for the "combined" cases.
             legend.labels <- "sampled"
-            legend.colours <- "blue"
+            legend.colours <- art.1.colour
             legend.ltys <- "solid"
             legend.lwds <- 20
             if (col.date == "combined") {
@@ -246,7 +254,7 @@ for (vl.info in c("known", "typical")) {
                     "sampling point 1",
                     "sampling point 2"
                 )
-                legend.colours <- c("steelblue", "turquoise")
+                legend.colours <- c(art.1.colour, art.2.colour)
                 legend.ltys <- c("solid", "solid")
                 legend.lwds <- c(20, 20)
             }
@@ -254,13 +262,13 @@ for (vl.info in c("known", "typical")) {
                 legend.labels,
                 "140mo decay",
                 "44mo decay",
-                paste(mle, "day decay", sep="")
+                paste(round(mle / 365, digits=2), "yr decay")
             )
             legend.colours <- c(
                 legend.colours,
                 "grey",
                 "black",
-                "green"
+                "red"
             )
             legend.ltys <- c(
                 legend.ltys,

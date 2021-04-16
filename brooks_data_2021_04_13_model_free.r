@@ -12,10 +12,12 @@
 #  - collection date (could also be "combined")
 # As the VL data doesn't enter into this analysis, there's nothing to separate the
 # "known" and "typical" VL cases.
-all.regressions <- list()
-
 vl.info <- "known"
 all.regressions <- list()
+
+# Our colour scheme for the "bar" parts of these graphs.
+art.1.colour <- "#5581B0"
+art.2.colour <- "#74DCD0"
 for (pid in names(all.log.likelihoods[[vl.info]])) {
     all.regressions[[pid]] <- list()
 
@@ -112,7 +114,7 @@ for (pid in names(all.log.likelihoods[[vl.info]])) {
                 actual.freqs$counts / total.count,
                 type="h",
                 lwd=20,
-                col="blue",
+                col=art.1.colour,
                 lend="butt"
             )
         } else {
@@ -153,7 +155,7 @@ for (pid in names(all.log.likelihoods[[vl.info]])) {
                 first.freqs$counts / total,
                 type="h",
                 lwd=20,
-                col="steelblue",
+                col=art.1.colour,
                 lend="butt"
             )
 
@@ -163,7 +165,7 @@ for (pid in names(all.log.likelihoods[[vl.info]])) {
                 y0=first.freqs$counts / total,
                 y1=(first.freqs$counts + last.freqs$counts) / total,
                 lwd=20,
-                col="turquoise",
+                col=art.2.colour,
                 lend="butt"
             )
         }
