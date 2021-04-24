@@ -59,8 +59,9 @@ for (pid in names(all.log.likelihoods[[vl.info]])) {
         lower.bounds <- exp(fit$fit - 1.96 * fit$se.fit)
 
         total.count <- sum(actual.freqs$counts)
-        max.y <- max(c(actual.freqs$counts, upper.bounds)) / total.count
-        max.y <- min(1, max.y)
+        # max.y <- max(c(actual.freqs$counts, upper.bounds)) / total.count
+        # max.y <- min(1, max.y)
+        max.y <- 1
 
         cairo_pdf(
             paste0(
@@ -95,7 +96,7 @@ for (pid in names(all.log.likelihoods[[vl.info]])) {
         )
 
         title(
-            ylab="Provirus proportion",
+            ylab="Proportion of proviruses",
             line=3.5,
             cex.lab=3
         )
@@ -207,13 +208,34 @@ for (pid in names(all.log.likelihoods[[vl.info]])) {
 
         text(
             x=0,
-            y=max.y * 0.85,
+            y=max.y * 0.96,
+            label=pid,
+            pos=4,
+            cex=2
+        )
+
+        text(
+            x=0,
+            y=max.y * 0.87,
+            label=substitute(
+                paste(
+                    t[1/2],
+                    " = ",
+                    hl,
+                    " yr",
+                    sep=""
+                ),
+                list(hl=round(half.life, digits=2))
+            ),
+            pos=4,
+            cex=2
+        )
+
+        text(
+            x=0,
+            y=max.y * 0.795,
             label=paste(
-                pid,
-                "\n",
-                "Half-life ",
-                round(half.life, digits=2),
-                " years\n(95% CI (",
+                "(95% CI (",
                 round(half.life.lower, digits=2),
                 ", ",
                 half.life.upper,  # we either already rounded it, or it's the infinity symbol

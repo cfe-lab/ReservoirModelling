@@ -15,6 +15,7 @@ source("reservoir_helpers.r")
 # We want the most detail in the half-year or so and then we can ease up.
 time.indices <- c(1:200000, seq(from=201000, 3650000, by=1000))
 x.values <- ode.bin.365$solution$time[time.indices]
+art.1.colour <- "#5581B0"
 
 for (untreated.years in c(3, 7)) {
     pdf(paste0("vl_curve_", untreated.years, "yr.pdf"))
@@ -25,6 +26,7 @@ for (untreated.years in c(3, 7)) {
         1000 * ode.bin.365$solution$V[time.indices],
         xlab=NA,
         ylab=NA,
+        xaxt="n",
         yaxt="n",
         type="l",
         log="y",
@@ -35,7 +37,7 @@ for (untreated.years in c(3, 7)) {
     )
 
     title(
-        xlab="Days post-infection",
+        xlab="Years post-infection",
         line=3.5,
         cex.lab=2.25
     )
@@ -44,6 +46,14 @@ for (untreated.years in c(3, 7)) {
         ylab="Viral load (log 10)",
         line=3.5,
         cex.lab=3
+    )
+
+    axis(
+        1,  # this is the x axis
+        at=seq(0, 365 * 10, by=365),
+        labels=c(0, NA, NA, 3, NA, NA, 6, NA, NA, 9, NA),
+        # labels=0:10,
+        cex.axis=2
     )
 
     axis(
@@ -67,9 +77,20 @@ for (untreated.years in c(3, 7)) {
 
     abline(v=365 * untreated.years, lty="dashed", lwd=3)
 
+    # Add a point representing a hypothetical sampling time one year after this.
+    points(
+        x=365 * (untreated.years + 1),
+        y=60,
+        pch=25,
+        cex=3,
+        lwd=3,
+        col=art.1.colour,
+        bg=art.1.colour
+    )
+
     text(
         x=365 * untreated.years,
-        y=1000000,
+        y=100000,
         labels=paste(untreated.years, "years"),
         pos=4,
         cex=2
@@ -77,8 +98,17 @@ for (untreated.years in c(3, 7)) {
 
     legend(
         "topright",
-        legend=c("No ART", paste("ART at", untreated.years, "years")),
-        fill=c("grey", treated.colour),
+        legend=c(
+            "No ART", 
+            paste("ART at", untreated.years, "years"),
+            "Proviral sampling"
+        ),
+        col=c("grey", treated.colour, art.1.colour),
+        lty=c("solid", "solid", NA),
+        lwd=c(10, 5, 3),
+        pch=c(NA, NA, 25),
+        pt.cex=c(1, 1, 3),
+        pt.bg=c("grey", treated.colour, art.1.colour),
         cex=1.5,
         bg="white"
     )
@@ -125,7 +155,7 @@ for (num.untreated.years in c(3, 7)) {
     )
 
     title(
-        ylab="Proportion",
+        ylab="Proportion of proviruses",
         line=3.5,
         cex.lab=3
     )
@@ -174,10 +204,10 @@ for (num.untreated.years in c(3, 7)) {
 
     # Build up the legend, with some customization for the "combined" cases.
     legend.labels <- c(
-        "no decay",
-        "140mo decay",
-        "44mo decay",
-        "180 day decay"
+        "created by viral seeding: no decay",
+        "with 140 mo decay",
+        "with 44 mo decay",
+        "with 6 mo decay"
     )
     legend.colours <- c(
         "purple",
@@ -285,6 +315,16 @@ for (pid in unique(vl.data$pid)) {
         col="grey"
     )
 
+    # Add a special symbol for any data points that are estimated.
+    estimated.idx <- which(pid.vl.data$is.estimated.peak != "N")
+    points(
+        x=pid.vl.data$days.after.infection[estimated.idx],
+        y=pid.vl.data$vl[estimated.idx],
+        col="purple",
+        lwd=3,
+        cex=3
+    )
+
     lines(
         actual.vl.x,
         actual.vl.y,
@@ -296,9 +336,12 @@ for (pid in unique(vl.data$pid)) {
 
     legend(
         "bottomright",
-        legend=c("typical", "actual"),
-        col=c("grey", "red"),
-        lwd=c(10, 3),
+        legend=c("typical", "actual", "estimated peak"),
+        col=c("grey", "red", "purple"),
+        lty=c("solid", "dashed", NA),
+        pch=c(NA, 1, 1),
+        lwd=c(10, 3, 3),
+        pt.cex=c(1, 1, 3),
         bty="n",
         cex=1.5
     )
