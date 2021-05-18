@@ -1,8 +1,6 @@
 # In this file, we break out and clean up some of the code in ode.r and turn it
 # into a library.
 
-# May 10, 2021: Harrison noticed that some of the initial parameters are swapped.
-
 library(deSolve)
 
 parameters <- c(
@@ -25,10 +23,10 @@ I.0 = parameters["gamma"] / parameters["pi"] * 0.03
 
 state <- c(
     S=70 / 0.2,
-    A.P=I.0 * parameters["tau"] * (1 - parameters["lambda"]),
-    A.U=I.0 * (1 - parameters["tau"]) * (1 - parameters["lambda"]),
-    L.P=I.0 * parameters["tau"] * parameters["lambda"],
-    L.U=I.0 * (1 - parameters["tau"]) * parameters["lambda"],
+    A.P=I.0 * (1 - parameters["tau"]) * (1 - parameters["lambda"]),
+    A.U=I.0 * parameters["tau"] * (1 - parameters["lambda"]),
+    L.P=I.0 * (1 - parameters["tau"]) * parameters["lambda"],
+    L.U=I.0 * parameters["tau"] * parameters["lambda"],
     E=0.0001 / 0.002,
     # E=1,
     V=30 / 1000

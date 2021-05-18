@@ -51,8 +51,8 @@ for (untreated.years in c(3, 7)) {
     axis(
         1,  # this is the x axis
         at=seq(0, 365 * 10, by=365),
-        labels=c(0, NA, NA, 3, NA, NA, 6, NA, NA, 9, NA),
-        # labels=0:10,
+        # labels=c(0, NA, NA, 3, NA, NA, 6, NA, NA, 9, NA),
+        labels=0:10,
         cex.axis=2
     )
 
