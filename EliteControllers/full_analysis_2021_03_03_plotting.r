@@ -133,15 +133,16 @@ for (subject in subjects) {
         )
         emp.dist <- actual.freqs$counts / sum(actual.freqs$counts)
 
-        max.y <- max(
-            c(
-                dist.44mo.decay$bin.dist, 
-                dist.140mo.decay$bin.dist, 
-                dist.best.fit$bin.dist, 
-                reservoir.dist$bin.dist.no.decay,
-                emp.dist
-            )
-        )
+        # max.y <- max(
+        #     c(
+        #         dist.44mo.decay$bin.dist, 
+        #         dist.140mo.decay$bin.dist, 
+        #         dist.best.fit$bin.dist, 
+        #         reservoir.dist$bin.dist.no.decay,
+        #         emp.dist
+        #     )
+        # )
+        max.y <- 1
 
         pdf(paste("composition_", subject, "_", regime, "_known_vl.pdf", sep=""))
         # par(mar=c(5, 4, 4, 12) + 0.1, xpd=TRUE)
@@ -272,10 +273,14 @@ for (subject in subjects) {
             "solid"
         )
         legend.line.widths <- c(20, 3, 3, 3, 3)
+        legend.location <- "topleft"
+        if (subject == "p3") {
+            legend.location <- "topright"
+        }
 
         if (subject != "p2") {
             legend(
-                "topleft",
+                legend.location,
                 legend=legend.captions,
                 col=legend.colours,
                 lty=legend.line.types,
@@ -290,7 +295,7 @@ for (subject in subjects) {
             p2.captions[4] <- "best fit (no decay)"
 
             legend(
-                "topleft",
+                legend.location,
                 legend=p2.captions,
                 col=legend.colours[p2.legend.indices],
                 lty=legend.line.types[p2.legend.indices],
