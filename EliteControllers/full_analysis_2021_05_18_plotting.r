@@ -153,7 +153,6 @@ for (subject in subjects) {
         x.label <- "Year prior to ART initiation"
         x.label.cex <- 2.25
         if (subject == "p3") {
-            y.limits[2] <- max.y + 0.2
             x.label <- "Year prior to last viremic episode"
         }
 
