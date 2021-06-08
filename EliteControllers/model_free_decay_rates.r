@@ -2,7 +2,7 @@
 # data, without using our model.
 
 # This is commented out as we will often have already loaded it when we run this script.
-# load("full_analysis_2021_03_03.RData")
+# load("full_analysis.RData")
 
 
 all.regressions <- list()
@@ -55,12 +55,13 @@ for (subject in subjects) {
         lower.bounds <- exp(fit$fit - 1.96 * fit$se.fit)
 
         total.count <- sum(actual.freqs$counts)
-        max.y <- max(c(actual.freqs$counts, upper.bounds)) / total.count
-        # Some customization for p2.
-        if (subject == "p2") {
-            max.y <- max.y + 0.075
-        }
-        max.y <- min(1, max.y)
+        # max.y <- max(c(actual.freqs$counts, upper.bounds)) / total.count
+        # # Some customization for p2.
+        # if (subject == "p2") {
+        #     max.y <- max.y + 0.075
+        # }
+        # max.y <- min(1, max.y)
+        max.y <- 1
 
         cairo_pdf(paste("model_free_decay_rate_", subject, ".pdf", sep=""))
         par(mar=c(6.5, 6.5, 2, 2) + 0.1)
@@ -163,15 +164,29 @@ for (subject in subjects) {
         text(
             x=0,
             y=max.y * 0.90,
-            label=paste(
-                "Half-life ",
-                round(half.life, digits=2),
-                " years\n(95% CI (",
+            label=substitute(
+                paste(
+                    t[1/2],
+                    " = ",
+                    half.life.formatted,
+                    " yr",
+                    sep=""
+                ),
+                list(half.life.formatted=round(half.life, digits=2))
+            ),
+            pos=4,
+            cex=2
+        )
+
+        text(
+            x=0,
+            y=max.y * 0.825,
+            label=paste0(
+                "(95% CI (",
                 round(half.life.lower, digits=2),
                 ", ",
                 half.life.upper,  # we either already rounded it, or it's the infinity symbol
-                "))",
-                sep=""
+                "))"
             ),
             pos=4,
             cex=2

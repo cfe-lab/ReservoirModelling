@@ -287,4 +287,4 @@ for (subject in subjects) {
 }
 
 
-save.image("full_analysis_2021_05_03.RData")
+save.image("full_analysis.RData")

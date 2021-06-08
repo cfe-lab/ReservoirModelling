@@ -1,5 +1,5 @@
 # This is commented out as we will often have already loaded it when we run this script.
-# load("full_analysis_2021_03_03.RData")
+# load("full_analysis.RData")
 library(plotrix)
 
 # Make plots of the decay rate estimates.
@@ -10,12 +10,36 @@ for (subject in subjects) {
     x.tick.marks[[subject]] <- c(seq(0, 6000, 1000), seq(50000, max(possible.half.lives), 1000))
 }
 
+bin.size <- 30
+mles <- NULL
+
 for (subject in subjects) {
     for (regime in regimes) {
         lls <- all.log.likelihoods[[subject]][[regime]]
 
         max.idx <- which.max(lls)
         mle <- possible.half.lives[max.idx]
+        # We get an estimate of the variance of the MLE via the Fisher information.
+        if (subject != "p2") {
+            estimated.variance <- 
+                1 / fisher.information(max.idx, ode.solutions.bin.30[[subject]][[regime]]$bin.freqs)
+
+            lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
+            upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
+        } else {
+            lower.bound <- 0
+            upper.bound <- Inf
+        }
+        mles <- rbind(
+            mles,
+            data.frame(
+                subject=subject,
+                regime=regime,
+                mle=mle,
+                lower.bound=lower.bound,
+                upper.bound=upper.bound
+            )
+        )
 
         # Filter out values in the plot gap.
         plot.gap <- gaps[[subject]]
@@ -54,13 +78,6 @@ for (subject in subjects) {
                 mle.plot <- mle - (plot.gap[2] - plot.gap[1])
             }
             abline(v=mle.plot, lty="dashed")
-
-            # We get an estimate of the variance of the MLE via the Fisher information.
-            estimated.variance <- 
-                1 / fisher.information(max.idx, ode.solutions.bin.30[[subject]][[regime]]$bin.freqs)
-
-            lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
-            upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
             abline(v=lower.bound, lty="dotted")
 
             # Some special handling if the upper bound is bigger than where we put the gap.
@@ -114,9 +131,10 @@ for (subject in subjects) {
     for (regime in regimes) {
         reservoir.dist <- ode.solutions.bin.365[[subject]][[regime]]
 
-        lls <- all.log.likelihoods[[subject]][[regime]]
-        max.idx <- which.max(lls)
-        mle <- possible.half.lives[max.idx]
+        mle.row <- mles[mles$subject == subject & mles$regime == regime,]
+        mle <- mle.row$mle
+        lower.bound <- mle.row$lower.bound
+        upper.bound <- mle.row$upper.bound
 
         dist.44mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 44 * 30, 365)
         dist.140mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 140 * 30, 365)
@@ -133,19 +151,9 @@ for (subject in subjects) {
         )
         emp.dist <- actual.freqs$counts / sum(actual.freqs$counts)
 
-        # max.y <- max(
-        #     c(
-        #         dist.44mo.decay$bin.dist, 
-        #         dist.140mo.decay$bin.dist, 
-        #         dist.best.fit$bin.dist, 
-        #         reservoir.dist$bin.dist.no.decay,
-        #         emp.dist
-        #     )
-        # )
         max.y <- 1
 
         pdf(paste("composition_", subject, "_", regime, "_known_vl.pdf", sep=""))
-        # par(mar=c(5, 4, 4, 12) + 0.1, xpd=TRUE)
         par(mar=c(6.5, 6.5, 2, 2) + 0.1)
 
         # Some defaults, and then some customization for p3.
@@ -203,13 +211,15 @@ for (subject in subjects) {
             lend="butt"
         )
 
+        comp.line.width <- 6
+
         if (subject != "p2") {
             lines(
                 c(0, seq(length(emp.dist) - length(reservoir.dist$bin.dist.no.decay) + 1, length(emp.dist))),
                 c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
                 type="S",
                 col=colour.alpha.helper("orange", alpha=175, max.colour.value=255),
-                lwd=3
+                lwd=comp.line.width
             )
         }
 
@@ -218,7 +228,7 @@ for (subject in subjects) {
             c(dist.140mo.decay$bin.dist[1], dist.140mo.decay$bin.dist),
             type="S",
             col=colour.alpha.helper("grey", alpha=175, max.colour.value=255),
-            lwd=3
+            lwd=comp.line.width
         )
 
         lines(
@@ -227,7 +237,7 @@ for (subject in subjects) {
             type="S",
             col="black",
             lty="dotdash",
-            lwd=3
+            lwd=comp.line.width
         )
 
         if (subject != "p2") {
@@ -236,7 +246,7 @@ for (subject in subjects) {
                 c(dist.best.fit$bin.dist[1], dist.best.fit$bin.dist),
                 type="S",
                 col=colour.alpha.helper("green", alpha=175, max.colour.value=255),
-                lwd=3
+                lwd=comp.line.width
             )
         } else {
             lines(
@@ -244,7 +254,7 @@ for (subject in subjects) {
                 c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
                 type="S",
                 col=colour.alpha.helper("green", alpha=175, max.colour.value=255),
-                lwd=3
+                lwd=comp.line.width
             )
         }
 
@@ -253,32 +263,53 @@ for (subject in subjects) {
         legend.captions <- c(
             "observed",
             "no decay",
-            "140mo decay",
-            "44mo decay",
-            paste("best-fit decay (", round(mle / 365, digits=2), " years)", sep="")
+            expression(paste(t[1/2], " = 140 mo")),
+            expression(paste(t[1/2], " = 44 mo")),
+            substitute(
+                paste(
+                    "best-fit ",
+                    t[1/2],
+                    " = ",
+                    best.fit.decay,
+                    " years",
+                    sep=""
+                ),
+                list(
+                    best.fit.decay=round(mle / 365, digits=2)
+                )
+            ),
+            paste0(
+                "(95% CI [", 
+                round(lower.bound / 365, digits=2), 
+                ", ", 
+                round(upper.bound / 365, digits=2), 
+                "))"
+            )
         )
         legend.colours <- c(
             "blue",
             "orange",
             "grey",
             "black",
-            "green"
+            "green",
+            "black"  # this should be ignored
         )
         legend.line.types <- c(
             "solid",
             "solid",
             "solid",
             "dotdash",
-            "solid"
+            "solid",
+            NA
         )
-        legend.line.widths <- c(20, 3, 3, 3, 3)
+        legend.line.widths <- c(20, comp.line.width, comp.line.width, comp.line.width, comp.line.width, 0)
         legend.location <- "topleft"
         if (subject == "p3") {
             legend.location <- "topright"
         }
 
         if (subject != "p2") {
-            legend(
+            legend.coords <- legend(
                 legend.location,
                 legend=legend.captions,
                 col=legend.colours,
