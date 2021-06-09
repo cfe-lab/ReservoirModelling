@@ -169,6 +169,9 @@ graft.acute.phase <- function(
 
 solve.odes <- function(all.subjects, grafted.vls) {
     require(deSolve)
+
+    ode.solutions.bin.30 <- list()
+    ode.solutions.bin.365 <- list()
     subjects <- names(grafted.vls)
     for (subject in subjects) {
         curr <- all.subjects[[subject]]
