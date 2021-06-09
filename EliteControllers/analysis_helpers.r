@@ -87,7 +87,7 @@ compute.days.before.art <- function(
                 days.before.right <- as.numeric(right.boundary - int.date)
 
                 if (days.after.left <= days.before.right) {
-                    return(as.numeric(right.bondary - left.boundary))
+                    return(as.numeric(right.boundary - left.boundary))
                 } else {
                     return(0)
                 }
