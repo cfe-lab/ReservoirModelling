@@ -19,7 +19,7 @@ gaps$p2$Miura <- c(4500, 25500)
 x.tick.marks$p2$Miura <- c(seq(0, 5000, 1000), seq(26000, max(possible.half.lives), 1000))
 
 gaps$p2$median <- c(14500, 49500)
-x.tick.marks$p2$Miura <- c(seq(0, 14000, 1000), seq(50000, max(possible.half.lives), 1000))
+x.tick.marks$p2$median <- c(seq(0, 14000, 1000), seq(50000, max(possible.half.lives), 1000))
 
 for (subject in subjects) {
     for (regime in regimes) {
