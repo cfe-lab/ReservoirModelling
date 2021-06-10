@@ -94,6 +94,8 @@ compute.days.before.art <- function(
             }
         )
     }
+
+    return(days.before.art)
 }
 
 
