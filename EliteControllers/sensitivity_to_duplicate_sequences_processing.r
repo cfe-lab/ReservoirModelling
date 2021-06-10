@@ -1,26 +1,23 @@
 # May 4, 2021: redoing the analysis of March 3 but with the viral load corrected.
 
+# This is commented out because we'll typically already have loaded the data.
+# load("full_analysis.RData")
+
 source("analysis_helpers.r")
 
-# These constants are taken from the literature.
-acute.phase <- list()
-acute.phase[["Miura"]] <- list(
-    days.to.peak=31,
-    peak.vl=53300,
-    days.to.undetectable=41
-)
-regimes <- names(acute.phase)
+# We only consider the Miura regime.
+acute.phase[["min"]] <- NULL
+acute.phase[["median"]] <- NULL
+acute.phase[["max"]] <- NULL
+
+regimes <- "Miura"
 subjects <- c("p1", "p2", "p3", "p4")
 
-# Read in the viral load data.
-read.vl <- prepare.vl.data(subjects, p3.special.handling=TRUE)
-all.subjects <- read.vl$all.subjects
-# Some special dates that we will have to remember for p3.
-p3.art.initiation <- read.vl$p3.art.initiation
-p3.blip <- read.vl$p3.blip
-
-# Graft on the acute phase.
-grafted.vls <- graft.acute.phase(all.subjects, acute.phase, acute.setpoint=1000)
+for (subject in subjects) {
+    all.subjects[[subject]][["min"]] <- NULL
+    all.subjects[[subject]][["median"]] <- NULL
+    all.subjects[[subject]][["max"]] <- NULL
+}
 
 # Read in the sample time data.
 for (subject in subjects) {
@@ -66,11 +63,15 @@ for (subject in subjects) {
 }
 
 
-# Solve the ODEs numerically (this is the slow part).
-ode.solutions <- solve.odes(all.subjects, grafted.vls)
-ode.solutions.bin.30 <- ode.solutions$bin.30
-ode.solutions.bin.365 <- ode.solutions$bin.365
-
+# The ODEs are unaffected by the different integration date data, but we
+# can eliminate everything for regimes except for the Miura regime.
+for (bin.size.label in c("bin.30", "bin.365")) {
+    for (subject in subjects) {
+        ode.solutions[[bin.size.label]][[subject]][["min"]] <- NULL
+        ode.solutions[[bin.size.label]][[subject]][["median"]] <- NULL
+        ode.solutions[[bin.size.label]][[subject]][["max"]] <- NULL
+    }
+}
 
 # Find the decay rate that maximizes the likelihood for each individual.
 bin.size <- 30
