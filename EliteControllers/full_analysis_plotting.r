@@ -29,7 +29,7 @@ for (subject in subjects) {
         upper.bound <- mle.row$upper.bound
 
         # Filter out values in the plot gap.
-        plot.gap <- gaps[[subject]]
+        plot.gap <- gaps[[subject]][[regime]]
         plot.indices <- possible.half.lives < plot.gap[1] | possible.half.lives > plot.gap[2] + 250
 
         pdf(paste(subject, "_", regime, "_known_vl.pdf", sep=""))
@@ -44,8 +44,8 @@ for (subject in subjects) {
             ylab=NA,
             cex.lab=3,
             cex.axis=2,
-            xtics=x.tick.marks[[subject]],
-            xticlab=x.tick.marks[[subject]]
+            xtics=x.tick.marks[[subject]][[regime]],
+            xticlab=x.tick.marks[[subject]][[regime]]
         )
         axis.break(1, plot.gap[1], breakcol="snow", style="gap")
         axis.break(1, plot.gap[1] * (1.02), breakcol="black", style="slash")
