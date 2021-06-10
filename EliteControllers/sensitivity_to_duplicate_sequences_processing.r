@@ -19,30 +19,39 @@ for (subject in subjects) {
     all.subjects[[subject]][["max"]] <- NULL
 }
 
-# Read in the sample time data.
+# The ODEs are unaffected by the different integration date data, but we
+# can eliminate everything for regimes except for the Miura regime.
+for (bin.size.label in c("bin.30", "bin.365")) {
+    for (subject in subjects) {
+        ode.solutions[[bin.size.label]][[subject]][["min"]] <- NULL
+        ode.solutions[[bin.size.label]][[subject]][["median"]] <- NULL
+        ode.solutions[[bin.size.label]][[subject]][["max"]] <- NULL
+    }
+}
+
+
+# Read in the sample time data, this time retaining the duplicates.
 for (subject in subjects) {
-    sample.times.path <- ""
-    # This is where the proviral integration data *with duplicates* lives.
-    if (subject != "p3") {
-        sample.times.path <- paste(
-            "../../data/EliteControllers_2020_11_30",
-            subject,
-            "sample_times.csv",
+    sample.times.base.path <- "../../data/IntegrationData_2021_06_10"
+
+    # Eliminate several columns we don't use.
+    subject.data <- read.csv(
+        paste(
+            "../../data/IntegrationData_2021_06_10", 
+            subject, 
+            "sample_times.csv", 
             sep="/"
         )
-    } else {
-        sample.times.path <- "../../data/P3_with_duplicates_no_truncation.csv"
-    }
-    subject.data <- read.csv(sample.times.path)
-
-    # The sample times CSV file has 4 useful columns, toss the rest.
-    subject.data <- subject.data[, c(1, 4, 5, 6)]
+    )
+    subject.data <- subject.data[, c(1, 4, 5, 6, 7)]
     names(subject.data) <- c(
         "id",
         "integration.date.est",
         "integration.date.lower",
-        "integration.date.upper"
+        "integration.date.upper",
+        "duplicate"
     )
+
     for (col.idx in 2:4) {
         subject.data[[col.idx]] <- strptime(subject.data[[col.idx]], "%Y-%m-%d")
     }
@@ -62,16 +71,6 @@ for (subject in subjects) {
     all.subjects[[subject]][["integration"]] <- subject.data
 }
 
-
-# The ODEs are unaffected by the different integration date data, but we
-# can eliminate everything for regimes except for the Miura regime.
-for (bin.size.label in c("bin.30", "bin.365")) {
-    for (subject in subjects) {
-        ode.solutions[[bin.size.label]][[subject]][["min"]] <- NULL
-        ode.solutions[[bin.size.label]][[subject]][["median"]] <- NULL
-        ode.solutions[[bin.size.label]][[subject]][["max"]] <- NULL
-    }
-}
 
 # Find the decay rate that maximizes the likelihood for each individual.
 bin.size <- 30

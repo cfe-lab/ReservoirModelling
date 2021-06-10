@@ -40,21 +40,33 @@ p3.blip <- read.vl$p3.blip
 # Graft on the acute phase.
 grafted.vls <- graft.acute.phase(all.subjects, acute.phase, acute.setpoint=1000)
 
+# Solve the ODEs numerically (this is the slow part).
+ode.solutions <- solve.odes(all.subjects, grafted.vls)
+
 # Read in the sample time data.
 for (subject in subjects) {
-    sample.times.base.path <- "../../data"
-    if (subject == "p3") {
-        sample.times.base.path <- paste(sample.times.base.path, "EliteControllers_2021_03_01", sep="/")
-    }
-    # The sample times CSV file has 4 useful columns, toss the rest.
-    subject.data <- read.csv(paste(sample.times.base.path, subject, "sample_times.csv", sep="/"))
-    subject.data <- subject.data[, c(1, 4, 5, 6)]
+    sample.times.base.path <- "../../data/IntegrationData_2021_06_10"
+
+    # Eliminate several columns we don't use.
+    subject.data <- read.csv(
+        paste(
+            "../../data/IntegrationData_2021_06_10", 
+            subject, 
+            "sample_times.csv", 
+            sep="/"
+        )
+    )
+    subject.data <- subject.data[, c(1, 4, 5, 6, 7)]
     names(subject.data) <- c(
         "id",
         "integration.date.est",
         "integration.date.lower",
-        "integration.date.upper"
+        "integration.date.upper",
+        "duplicate"
     )
+    # For this analysis, we remove duplicate sequences.
+    subject.data <- subject.data[is.na(subject.data$duplicate),]
+
     for (col.idx in 2:4) {
         subject.data[[col.idx]] <- strptime(subject.data[[col.idx]], "%Y-%m-%d")
     }
@@ -73,10 +85,6 @@ for (subject in subjects) {
     }
     all.subjects[[subject]][["integration"]] <- subject.data
 }
-
-
-# Solve the ODEs numerically (this is the slow part).
-ode.solutions <- solve.odes(all.subjects, grafted.vls)
 
 
 # Find the decay rate that maximizes the likelihood for each individual.
