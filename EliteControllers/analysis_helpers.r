@@ -230,6 +230,7 @@ compute.lls <- function(
         all.log.likelihoods[[subject]] <- list()
         curr.data <- all.subjects[[subject]]$integration
 
+        regimes <- names(ode.solutions.bin.30[[subject]])
         for (regime in regimes) {
             all.log.likelihoods[[subject]][[regime]] <- list()
 
