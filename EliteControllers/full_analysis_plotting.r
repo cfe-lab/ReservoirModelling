@@ -6,8 +6,8 @@ library(plotrix)
 gaps <- list()
 x.tick.marks <- list()
 for (subject in subjects) {
-    gaps[[subject]] <- c(6500, 49500)
-    x.tick.marks[[subject]] <- c(seq(0, 6000, 1000), seq(50000, max(possible.half.lives), 1000))
+    gaps[[subject]] <- c(7500, 49500)
+    x.tick.marks[[subject]] <- c(seq(0, 7000, 1000), seq(50000, max(possible.half.lives), 1000))
 }
 
 bin.size <- 30
@@ -20,16 +20,12 @@ for (subject in subjects) {
         max.idx <- which.max(lls)
         mle <- possible.half.lives[max.idx]
         # We get an estimate of the variance of the MLE via the Fisher information.
-        if (subject != "p2") {
-            estimated.variance <- 
-                1 / fisher.information(max.idx, ode.solutions.bin.30[[subject]][[regime]]$bin.freqs)
+        estimated.variance <- 
+            1 / fisher.information(max.idx, ode.solutions.bin.30[[subject]][[regime]]$bin.freqs)
 
-            lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
-            upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
-        } else {
-            lower.bound <- 0
-            upper.bound <- Inf
-        }
+        lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
+        upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
+
         mles <- rbind(
             mles,
             data.frame(
