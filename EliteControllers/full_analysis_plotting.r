@@ -6,36 +6,27 @@ library(plotrix)
 gaps <- list()
 x.tick.marks <- list()
 for (subject in subjects) {
-    gaps[[subject]] <- c(7500, 49500)
-    x.tick.marks[[subject]] <- c(seq(0, 7000, 1000), seq(50000, max(possible.half.lives), 1000))
+    gaps[[subject]] <- list()
+    x.tick.marks[[subject]] <- list()
+    for (regime in regimes) {
+        gaps[[subject]][[regime]] <- c(7500, 49500)
+        x.tick.marks[[subject]][[regime]] <- c(seq(0, 7000, 1000), seq(50000, max(possible.half.lives), 1000))
+    }
 }
 
-bin.size <- 30
-mles <- NULL
+# Special handling for p2-median and p2-Miura.
+gaps$p2$Miura <- c(4500, 25500)
+x.tick.marks$p2$Miura <- c(seq(0, 5000, 1000), seq(26000, max(possible.half.lives), 1000))
+
+gaps$p2$median <- c(14500, 49500)
+x.tick.marks$p2$Miura <- c(seq(0, 14000, 1000), seq(50000, max(possible.half.lives), 1000))
 
 for (subject in subjects) {
     for (regime in regimes) {
-        lls <- all.log.likelihoods[[subject]][[regime]]
-
-        max.idx <- which.max(lls)
-        mle <- possible.half.lives[max.idx]
-        # We get an estimate of the variance of the MLE via the Fisher information.
-        estimated.variance <- 
-            1 / fisher.information(max.idx, ode.solutions.bin.30[[subject]][[regime]]$bin.freqs)
-
-        lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
-        upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
-
-        mles <- rbind(
-            mles,
-            data.frame(
-                subject=subject,
-                regime=regime,
-                mle=mle,
-                lower.bound=lower.bound,
-                upper.bound=upper.bound
-            )
-        )
+        mle.row <- mles[mles$subject == subject & mles$regime == regime,]
+        mle <- mle.row$mle
+        lower.bound <- mle.row$lower.bound
+        upper.bound <- mle.row$upper.bound
 
         # Filter out values in the plot gap.
         plot.gap <- gaps[[subject]]
@@ -67,7 +58,7 @@ for (subject in subjects) {
             cex.lab=3
         )
 
-        if (subject != "p2") {
+        if (subject != "p2" || regime != "min") {
             # Some special handling if the MLE is bigger than where we put the gap.
             mle.plot <- mle
             if (mle > plot.gap[2]) {
@@ -125,7 +116,7 @@ for (subject in subjects) {
         )
 
     for (regime in regimes) {
-        reservoir.dist <- ode.solutions.bin.365[[subject]][[regime]]
+        reservoir.dist <- ode.solutions$bin.365[[subject]][[regime]]
 
         mle.row <- mles[mles$subject == subject & mles$regime == regime,]
         mle <- mle.row$mle
@@ -209,7 +200,7 @@ for (subject in subjects) {
 
         comp.line.width <- 6
 
-        if (subject != "p2") {
+        if (subject != "p2" || regime != "min") {
             lines(
                 c(0, seq(length(emp.dist) - length(reservoir.dist$bin.dist.no.decay) + 1, length(emp.dist))),
                 c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
@@ -236,7 +227,7 @@ for (subject in subjects) {
             lwd=comp.line.width
         )
 
-        if (subject != "p2") {
+        if (subject != "p2" || regime != "min") {
             lines(
                 c(0, seq(length(emp.dist) - length(dist.best.fit$bin.dist) + 1, length(emp.dist))),
                 c(dist.best.fit$bin.dist[1], dist.best.fit$bin.dist),
@@ -304,7 +295,7 @@ for (subject in subjects) {
             legend.location <- "topright"
         }
 
-        if (subject != "p2") {
+        if (subject != "p2" || regime != "min") {
             legend.coords <- legend(
                 legend.location,
                 legend=legend.captions,
@@ -315,7 +306,7 @@ for (subject in subjects) {
                 bty="n"
             )
         } else {
-            # We customize the legend for p2.
+            # We customize the legend for the p2-min case.
             p2.legend.indices <- c(1, 3, 4, 5)
             p2.captions <- legend.captions[p2.legend.indices]
             p2.captions[4] <- "best fit (no decay)"

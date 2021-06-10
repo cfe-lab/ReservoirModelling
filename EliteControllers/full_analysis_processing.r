@@ -77,8 +77,6 @@ for (subject in subjects) {
 
 # Solve the ODEs numerically (this is the slow part).
 ode.solutions <- solve.odes(all.subjects, grafted.vls)
-ode.solutions.bin.30 <- ode.solutions$bin.30
-ode.solutions.bin.365 <- ode.solutions$bin.365
 
 
 # Find the decay rate that maximizes the likelihood for each individual.
@@ -89,6 +87,13 @@ all.log.likelihoods <- compute.lls(
     ode.solutions$bin.30,
     bin.size=bin.size,
     possible.half.lives=possible.half.lives
+)
+
+mles <- compute.mles(
+    all.log.likelihoods,
+    ode.solutions$bin.30,
+    bin.size,
+    possible.half.lives
 )
 
 save.image("full_analysis.RData")

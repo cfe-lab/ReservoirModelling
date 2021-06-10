@@ -282,3 +282,41 @@ compute.lls <- function(
 
     return(all.log.likelihoods)
 }
+
+
+compute.mles <- function(
+    all.log.likelihoods,
+    ode.solutions.bin.30,
+    bin.size,
+    possible.half.lives
+) {
+    mles <- NULL
+    subjects <- names(all.log.likelihoods)
+    for (subject in subjects) {
+        regimes <- names(all.log.likelihoods[[subject]])
+        for (regime in regimes) {
+            lls <- all.log.likelihoods[[subject]][[regime]]
+
+            max.idx <- which.max(lls)
+            mle <- possible.half.lives[max.idx]
+            # We get an estimate of the variance of the MLE via the Fisher information.
+            estimated.variance <- 
+                1 / fisher.information(max.idx, ode.solutions.bin.30[[subject]][[regime]]$bin.freqs)
+
+            lower.bound <- max(0, mle - 2 * sqrt(estimated.variance) * bin.size)
+            upper.bound <- mle + 2 * sqrt(estimated.variance) * bin.size
+
+            mles <- rbind(
+                mles,
+                data.frame(
+                    subject=subject,
+                    regime=regime,
+                    mle=mle,
+                    lower.bound=lower.bound,
+                    upper.bound=upper.bound
+                )
+            )
+        }
+    }
+    return(mles)
+}
