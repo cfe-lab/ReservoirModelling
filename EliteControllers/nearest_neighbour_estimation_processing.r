@@ -52,4 +52,11 @@ all.log.likelihoods <- compute.lls(
     possible.half.lives=possible.half.lives
 )
 
+mles <- compute.mles(
+    all.log.likelihoods,
+    ode.solutions$bin.30,
+    bin.size,
+    possible.half.lives
+)
+
 save.image("nn_integration_dates_analysis.RData")
