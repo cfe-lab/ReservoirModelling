@@ -107,7 +107,7 @@ mles <- compute.mles(
 )
 
 bayes.factors <- compute.bayes.factors(
-    all.subjects
+    all.subjects,
     ode.solutions$bin.30,
     all.log.likelihoods
 )

@@ -59,4 +59,10 @@ mles <- compute.mles(
     possible.half.lives
 )
 
+bayes.factors <- compute.bayes.factors(
+    all.subjects,
+    ode.solutions$bin.30,
+    all.log.likelihoods
+)
+
 save.image("nn_integration_dates_analysis.RData")
