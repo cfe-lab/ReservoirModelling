@@ -356,7 +356,7 @@ compute.bayes.factors <- function(
             max.idx <- which.max(lls)
             max.ll <- lls[max.idx]
 
-            bayes.factor <- exp(no.decay.ll - max.ll)
+            bayes.factor <- exp(max.ll - no.decay.ll)
             bayes.factors <- rbind(
                 bayes.factors,
                 data.frame(
