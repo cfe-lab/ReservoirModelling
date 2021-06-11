@@ -128,8 +128,8 @@ for (subject in subjects) {
         # This is our criteria for whether our model is supported or whether a 
         # "no-decay" model is a better fit.
         bayes.factor <- bayes.factors$bayes.factor[
-            bayes.factor$subject == subject 
-            & bayes.factor$regime == regime
+            bayes.factors$subject == subject 
+            & bayes.factors$regime == regime
         ]
 
         dist.44mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 44 * 30, 365)
