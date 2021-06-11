@@ -74,12 +74,14 @@ for (subject in subjects) {
     if (subject != "p3") {
         subject.data$days.before.art <- compute.days.before.art(
             subject.data$integration.date.est,
-            all.subjects[[subject]]$art.initiation
+            all.subjects[[subject]]$art.initiation,
+            all.subjects[[subject]]$infection.date
         )
     } else {
         subject.data$days.before.art <- compute.days.before.art(
             subject.data$integration.date.est,
             all.subjects[[subject]]$art.initiation,
+            all.subjects[[subject]]$infection.date,
             boundaries=c(p3.art.initiation, p3.blip)
         )
     }

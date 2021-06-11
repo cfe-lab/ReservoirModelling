@@ -57,15 +57,25 @@ prepare.vl.data <- function(
 compute.days.before.art <- function(
     integration.date,
     model.start.date,  # usually ART initiation, but could be a viremic episode
+    earliest.possible.date=NULL,  # usually EDI
     boundaries=NULL  # shunt values between these boundaries to the closest boundary
 ) {
     days.before.art.raw <-
         as.numeric(model.start.date - integration.date, units="days")
+
+    earliest.possible.days.before.art <- Inf
+    if (!is.null(earliest.possible.date)) {
+        earliest.possible.days.before.art <-
+            as.numeric(model.start.date - earliest.possible.date, units="days")
+    }
     
     days.before.art <- sapply(
         days.before.art.raw,
         function (x) {
             if (x >= 0) {
+                if (x > earliest.possible.days.before.art) {
+                    return(earliest.possible.days.before.art)
+                }
                 return(x)
             }
             return(0)
