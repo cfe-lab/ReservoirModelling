@@ -45,14 +45,14 @@ ode.solutions <- solve.odes(all.subjects, grafted.vls)
 
 # Read in the sample time data.
 for (subject in subjects) {
-    sample.times.base.path <- "../../data/IntegrationData_2021_06_10"
-
     # Eliminate several columns we don't use.
     subject.data <- read.csv(
         paste(
-            "../../data/IntegrationData_2021_06_10", 
-            subject, 
-            "sample_times.csv", 
+            "../../data/IntegrationData_2021_06_10",
+            paste0(
+                subject,
+                "_integration.csv"
+            ),
             sep="/"
         )
     )
