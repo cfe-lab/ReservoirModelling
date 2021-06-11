@@ -125,6 +125,13 @@ for (subject in subjects) {
         lower.bound <- mle.row$lower.bound
         upper.bound <- mle.row$upper.bound
 
+        # This is our criteria for whether our model is supported or whether a 
+        # "no-decay" model is a better fit.
+        bayes.factor <- bayes.factors$bayes.factor[
+            bayes.factor$subject == subject 
+            & bayes.factor$regime == regime
+        ]
+
         dist.44mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 44 * 30, 365)
         dist.140mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 140 * 30, 365)
         dist.best.fit <- decay.distribution(reservoir.dist$bin.freqs, mle, 365)
@@ -202,8 +209,7 @@ for (subject in subjects) {
 
         comp.line.width <- 6
 
-        # if (subject != "p2" || regime != "min") {
-        if (mle != max(possible.half.lives)) {
+        if (bayes.factor >= 1) {
             lines(
                 c(0, seq(length(emp.dist) - length(reservoir.dist$bin.dist.no.decay) + 1, length(emp.dist))),
                 c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
@@ -230,8 +236,7 @@ for (subject in subjects) {
             lwd=comp.line.width
         )
 
-        # if (subject != "p2" || regime != "min") {
-        if (mle != max(possible.half.lives)) {
+        if (bayes.factor >= 1) {
             lines(
                 c(0, seq(length(emp.dist) - length(dist.best.fit$bin.dist) + 1, length(emp.dist))),
                 c(dist.best.fit$bin.dist[1], dist.best.fit$bin.dist),
@@ -299,8 +304,7 @@ for (subject in subjects) {
             legend.location <- "topright"
         }
 
-        # if (subject != "p2" || regime != "min") {
-        if (mle != max(possible.half.lives)) {
+        if (bayes.factor >= 1) {
             legend.coords <- legend(
                 legend.location,
                 legend=legend.captions,
