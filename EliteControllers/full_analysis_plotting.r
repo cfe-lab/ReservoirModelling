@@ -98,7 +98,7 @@ for (subject in subjects) {
             text(
                 x=51000 - (plot.gap[2] - plot.gap[1]),
                 y=sum(range(lls)) / 2,
-                labels="no meaningful MLE found",
+                labels="no meaningful\nMLE found",
                 cex=2
             )
         }
@@ -280,7 +280,8 @@ for (subject in subjects) {
                 ", ", 
                 round(upper.bound / 365, digits=2), 
                 "))"
-            )
+            ),
+            paste0("BF = ", round(bayes.factor, digits=2))
         )
         legend.colours <- c(
             "blue",
@@ -288,7 +289,8 @@ for (subject in subjects) {
             "grey",
             "black",
             "green",
-            "black"  # this should be ignored
+            "black",  # this should be ignored
+            "black"  # as should this
         )
         legend.line.types <- c(
             "solid",
@@ -296,9 +298,10 @@ for (subject in subjects) {
             "solid",
             "dotdash",
             "solid",
+            NA,
             NA
         )
-        legend.line.widths <- c(20, comp.line.width, comp.line.width, comp.line.width, comp.line.width, 0)
+        legend.line.widths <- c(20, comp.line.width, comp.line.width, comp.line.width, comp.line.width, 0, 0)
         legend.location <- "topleft"
         if (subject == "p3") {
             legend.location <- "topright"
@@ -316,7 +319,7 @@ for (subject in subjects) {
             )
         } else {
             # We customize the legend for cases where no meaningful MLE was found.
-            p2.legend.indices <- c(1, 3, 4, 5)
+            p2.legend.indices <- c(1, 3, 4, 5, 6)
             p2.captions <- legend.captions[p2.legend.indices]
             p2.captions[4] <- "best fit (no decay)"
 
