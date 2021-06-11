@@ -330,3 +330,42 @@ compute.mles <- function(
     }
     return(mles)
 }
+
+
+compute.bayes.factors <- function(
+    all.subjects,
+    ode.solutions.bin.30,
+    all.log.likelihoods
+) {
+    bayes.factors <- NULL
+    subjects <- names(all.subjects)
+    for (subject in subjects) {
+        regimes <- names(ode.solutions.bin.30[[subject]])
+        for (regime in regimes) {
+            curr.data <- all.subjects[[subject]]$integration
+            reservoir.dist <- ode.solutions$bin.30[[subject]][[regime]]
+
+            no.decay.ll.no.factorial <- log.likelihood.no.factorial(
+                curr.data$days.before.art,
+                reservoir.dist$bin.dist.no.decay,
+                30
+            )
+            no.decay.ll <- no.decay.ll.no.factorial + sum(log(1:nrow(curr.data)))
+
+            lls <- all.log.likelihoods[[subject]][[regime]]
+            max.idx <- which.max(lls)
+            max.ll <- lls[max.idx]
+
+            bayes.factor <- exp(no.decay.ll - max.ll)
+            bayes.factors <- rbind(
+                bayes.factors,
+                data.frame(
+                    subject=subject,
+                    regime=regime,
+                    bayes.factor=bayes.factor
+                )
+            )
+        }
+    }
+    return(bayes.factors)
+}

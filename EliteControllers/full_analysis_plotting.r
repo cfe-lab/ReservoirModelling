@@ -59,7 +59,8 @@ for (subject in subjects) {
             cex.lab=3
         )
 
-        if (subject != "p2" || regime != "min") {
+        # if (subject != "p2" || regime != "min") {
+        if (mle != max(possible.half.lives)) {
             # Some special handling if the MLE is bigger than where we put the gap.
             mle.plot <- mle
             if (mle > plot.gap[2]) {
@@ -97,7 +98,7 @@ for (subject in subjects) {
             text(
                 x=51000 - (plot.gap[2] - plot.gap[1]),
                 y=sum(range(lls)) / 2,
-                labels="best fit achieved\nwith no decay",
+                labels="no meaningful MLE found",
                 cex=2
             )
         }
@@ -201,7 +202,8 @@ for (subject in subjects) {
 
         comp.line.width <- 6
 
-        if (subject != "p2" || regime != "min") {
+        # if (subject != "p2" || regime != "min") {
+        if (mle != max(possible.half.lives)) {
             lines(
                 c(0, seq(length(emp.dist) - length(reservoir.dist$bin.dist.no.decay) + 1, length(emp.dist))),
                 c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
@@ -228,7 +230,8 @@ for (subject in subjects) {
             lwd=comp.line.width
         )
 
-        if (subject != "p2" || regime != "min") {
+        # if (subject != "p2" || regime != "min") {
+        if (mle != max(possible.half.lives)) {
             lines(
                 c(0, seq(length(emp.dist) - length(dist.best.fit$bin.dist) + 1, length(emp.dist))),
                 c(dist.best.fit$bin.dist[1], dist.best.fit$bin.dist),
@@ -296,7 +299,8 @@ for (subject in subjects) {
             legend.location <- "topright"
         }
 
-        if (subject != "p2" || regime != "min") {
+        # if (subject != "p2" || regime != "min") {
+        if (mle != max(possible.half.lives)) {
             legend.coords <- legend(
                 legend.location,
                 legend=legend.captions,
@@ -307,7 +311,7 @@ for (subject in subjects) {
                 bty="n"
             )
         } else {
-            # We customize the legend for the p2-min case.
+            # We customize the legend for cases where no meaningful MLE was found.
             p2.legend.indices <- c(1, 3, 4, 5)
             p2.captions <- legend.captions[p2.legend.indices]
             p2.captions[4] <- "best fit (no decay)"

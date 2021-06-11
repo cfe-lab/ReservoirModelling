@@ -106,4 +106,10 @@ mles <- compute.mles(
     possible.half.lives
 )
 
+bayes.factors <- compute.bayes.factors(
+    all.subjects
+    ode.solutions$bin.30,
+    all.log.likelihoods
+)
+
 save.image("full_analysis.RData")
