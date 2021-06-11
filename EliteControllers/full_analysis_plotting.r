@@ -281,7 +281,7 @@ for (subject in subjects) {
                 round(upper.bound / 365, digits=2), 
                 "))"
             ),
-            paste0("BF = ", round(bayes.factor, digits=2))
+            paste0("BF = ", format(bayes.factor, digits=3, scientific=0))
         )
         legend.colours <- c(
             "blue",
@@ -319,7 +319,7 @@ for (subject in subjects) {
             )
         } else {
             # We customize the legend for cases where no meaningful MLE was found.
-            p2.legend.indices <- c(1, 3, 4, 5, 6)
+            p2.legend.indices <- c(1, 3, 4, 5, 7)
             p2.captions <- legend.captions[p2.legend.indices]
             p2.captions[4] <- "best fit (no decay)"
 
