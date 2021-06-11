@@ -33,7 +33,8 @@ for (subject in subjects) {
     # they're all necessarily before cART initiation.
     subject.data$days.before.art <- compute.days.before.art(
         subject.data$integration.date.est,
-        all.subjects[[subject]]$art.initiation
+        all.subjects[[subject]]$art.initiation,
+        all.subjects[[subject]]$infection.date
     )
 
     # Overwrite the integration data that we inherit from the full analysis.
