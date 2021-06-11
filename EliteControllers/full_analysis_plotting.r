@@ -23,6 +23,7 @@ x.tick.marks$p2$median <- c(seq(0, 14000, 1000), seq(50000, max(possible.half.li
 
 for (subject in subjects) {
     for (regime in regimes) {
+        lls <- all.log.likelihoods[[subject]][[regime]]
         mle.row <- mles[mles$subject == subject & mles$regime == regime,]
         mle <- mle.row$mle
         lower.bound <- mle.row$lower.bound
