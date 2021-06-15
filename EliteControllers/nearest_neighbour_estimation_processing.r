@@ -5,7 +5,7 @@ source("analysis_helpers.r")
 
 # This is commented out because we will typically have already loaded this,
 # or have just re-run the analysis producing it.
-# load("full_analysis.RData")
+# load("full_analysis_ode.RData")
 
 # Read in the sample time data.
 for (subject in subjects) {
@@ -65,4 +65,12 @@ bayes.factors <- compute.bayes.factors(
     all.log.likelihoods
 )
 
-save.image("nn_integration_dates_analysis.RData")
+save(
+    all.subjects,
+    bin.size,
+    possible.half.lives,
+    all.log.likelihoods,
+    mles,
+    bayes.factors,
+    file="nearest_neighbour_estimation_analysis.RData"
+)

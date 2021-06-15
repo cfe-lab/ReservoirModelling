@@ -1,4 +1,5 @@
 # This is commented out as we will often have already loaded it when we run this script.
+# load("full_analysis_ode.RData")
 # load("full_analysis.RData")
 library(plotrix)
 
@@ -21,91 +22,25 @@ x.tick.marks$p2$Miura <- c(seq(0, 5000, 1000), seq(26000, max(possible.half.live
 gaps$p2$median <- c(14500, 49500)
 x.tick.marks$p2$median <- c(seq(0, 14000, 1000), seq(50000, max(possible.half.lives), 1000))
 
+
 for (subject in subjects) {
     for (regime in regimes) {
-        lls <- all.log.likelihoods[[subject]][[regime]]
         mle.row <- mles[mles$subject == subject & mles$regime == regime,]
-        mle <- mle.row$mle
-        lower.bound <- mle.row$lower.bound
-        upper.bound <- mle.row$upper.bound
-
-        # Filter out values in the plot gap.
-        plot.gap <- gaps[[subject]][[regime]]
-        plot.indices <- possible.half.lives < plot.gap[1] | possible.half.lives > plot.gap[2] + 250
 
         pdf(paste(subject, "_", regime, "_known_vl.pdf", sep=""))
-        par(mar=c(6.5, 6.5, 2, 2) + 0.1)
-        gap.plot(
-            possible.half.lives[plot.indices],
-            lls[plot.indices],
-            gap=plot.gap,
-            gap.axis="x",
-            # main=paste("LLs (using known VL) by decay rate: ", subject, " (", regime, " case)", sep=""),
-            xlab=NA,
-            ylab=NA,
-            cex.lab=3,
-            cex.axis=2,
-            xtics=x.tick.marks[[subject]][[regime]],
-            xticlab=x.tick.marks[[subject]][[regime]]
+        ll.plot(
+            all.log.likelihoods[[subject]][[regime]],
+            possible.half.lives,
+            mle.row$mle,
+            mle.row$lower.bound,
+            mle.row$upper.bound,
+            gaps[[subject]][[regime]],
+            x.tick.marks[[subject]][[regime]]
         )
-        axis.break(1, plot.gap[1], breakcol="snow", style="gap")
-        axis.break(1, plot.gap[1] * (1.02), breakcol="black", style="slash")
-        axis.break(3, plot.gap[1] * (1.02), breakcol="black", style="slash")
-
-        title(
-            xlab="Reservoir half life (days)",
-            ylab="Log likelihood",
-            line=3.5,
-            cex.lab=3
-        )
-
-        # if (subject != "p2" || regime != "min") {
-        if (mle != max(possible.half.lives)) {
-            # Some special handling if the MLE is bigger than where we put the gap.
-            mle.plot <- mle
-            if (mle > plot.gap[2]) {
-                mle.plot <- mle - (plot.gap[2] - plot.gap[1])
-            }
-            abline(v=mle.plot, lty="dashed")
-            abline(v=lower.bound, lty="dotted")
-
-            # Some special handling if the upper bound is bigger than where we put the gap.
-            upper.bound.plot <- upper.bound
-            if (upper.bound > plot.gap[2]) {
-                upper.bound.plot <- upper.bound - (plot.gap[2] - plot.gap[1])
-            }
-            abline(v=upper.bound.plot, lty="dotted")
-
-            position <- 4
-            text(
-                x=mle.plot,
-                y=sum(range(lls)) / 2,
-                labels=paste(mle, "days"),
-                pos=position,
-                cex=2,
-                offset=0.1
-            )
-
-            text(
-                x=upper.bound.plot,
-                y=min(lls) + (max(lls) - min(lls))/ 4,
-                labels=paste(round(upper.bound, digits=2), "days"),
-                pos=position,
-                cex=2,
-                offset=0.1
-            )
-        } else {
-            text(
-                x=51000 - (plot.gap[2] - plot.gap[1]),
-                y=sum(range(lls)) / 2,
-                labels="no meaningful\nMLE found",
-                cex=2
-            )
-        }
-
         dev.off()
     }
 }
+
 
 # Plots of reservoir composition.
 for (subject in subjects) {
@@ -118,12 +53,7 @@ for (subject in subjects) {
         )
 
     for (regime in regimes) {
-        reservoir.dist <- ode.solutions$bin.365[[subject]][[regime]]
-
         mle.row <- mles[mles$subject == subject & mles$regime == regime,]
-        mle <- mle.row$mle
-        lower.bound <- mle.row$lower.bound
-        upper.bound <- mle.row$upper.bound
 
         # This is our criteria for whether our model is supported or whether a 
         # "no-decay" model is a better fit.
@@ -132,207 +62,26 @@ for (subject in subjects) {
             & bayes.factors$regime == regime
         ]
 
-        dist.44mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 44 * 30, 365)
-        dist.140mo.decay <- decay.distribution(reservoir.dist$bin.freqs, 140 * 30, 365)
-        dist.best.fit <- decay.distribution(reservoir.dist$bin.freqs, mle, 365)
-
-        breakpoints = seq(0, max(c(curr.data$days.before.art, days.pre.therapy)), by=365)
-        if (!(max(curr.data$days.before.art) %in% breakpoints)) {
-            breakpoints = c(breakpoints, breakpoints[length(breakpoints)] + 365)
-        }
-        actual.freqs <- hist(
-            curr.data$days.before.art,
-            breaks=breakpoints,
-            plot=FALSE
-        )
-        emp.dist <- actual.freqs$counts / sum(actual.freqs$counts)
-
-        max.y <- 1
-
-        pdf(paste("composition_", subject, "_", regime, "_known_vl.pdf", sep=""))
-        par(mar=c(6.5, 6.5, 2, 2) + 0.1)
-
-        # Some defaults, and then some customization for p3.
-        y.limits <- c(0, max.y)
         x.label <- "Year prior to ART initiation"
-        x.label.cex <- 2.25
-        if (subject == "p3") {
-            x.label <- "Year prior to last viremic episode"
-        }
-
-        plot(
-            c(0, length(emp.dist)),
-            y.limits,
-            # main=paste(
-            #     "Reservoir composition (VL known) for ", 
-            #     subject,
-            #     " (",
-            #     regime,
-            #     " case)",
-            #     sep=""
-            # ),
-            xlab=NA,
-            ylab=NA,
-            type="n",
-            xaxt="n",
-            cex.lab=3,
-            cex.axis=2
-        )
-
-        title(
-            xlab=x.label,
-            line=3.5,
-            cex.lab=x.label.cex
-        )
-
-        title(
-            ylab="Provirus proportion",
-            line=3.5,
-            cex.lab=3
-        )
-
-        axis(
-            1,  # this is the x axis
-            at=seq(1, length(emp.dist)) - 0.5,
-            labels=seq(length(emp.dist), 1, by=-1),
-            cex.axis=2
-        )
-
-        lines(
-            seq(length(emp.dist), 1, by=-1) - 0.5,
-            emp.dist,
-            type="h",
-            lwd=20,
-            col="blue",
-            lend="butt"
-        )
-
-        comp.line.width <- 6
-
-        if (bayes.factor >= 1) {
-            lines(
-                c(0, seq(length(emp.dist) - length(reservoir.dist$bin.dist.no.decay) + 1, length(emp.dist))),
-                c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
-                type="S",
-                col=colour.alpha.helper("orange", alpha=175, max.colour.value=255),
-                lwd=comp.line.width
-            )
-        }
-
-        lines(
-            c(0, seq(length(emp.dist) - length(dist.140mo.decay$bin.dist) + 1, length(emp.dist))),
-            c(dist.140mo.decay$bin.dist[1], dist.140mo.decay$bin.dist),
-            type="S",
-            col=colour.alpha.helper("grey", alpha=175, max.colour.value=255),
-            lwd=comp.line.width
-        )
-
-        lines(
-            c(0, seq(length(emp.dist) - length(dist.44mo.decay$bin.dist) + 1, length(emp.dist))),
-            c(dist.44mo.decay$bin.dist[1], dist.44mo.decay$bin.dist),
-            type="S",
-            col="black",
-            lty="dotdash",
-            lwd=comp.line.width
-        )
-
-        if (bayes.factor >= 1) {
-            lines(
-                c(0, seq(length(emp.dist) - length(dist.best.fit$bin.dist) + 1, length(emp.dist))),
-                c(dist.best.fit$bin.dist[1], dist.best.fit$bin.dist),
-                type="S",
-                col=colour.alpha.helper("green", alpha=175, max.colour.value=255),
-                lwd=comp.line.width
-            )
-        } else {
-            lines(
-                c(0, seq(length(emp.dist) - length(reservoir.dist$bin.dist.no.decay) + 1, length(emp.dist))),
-                c(reservoir.dist$bin.dist.no.decay[1], reservoir.dist$bin.dist.no.decay),
-                type="S",
-                col=colour.alpha.helper("green", alpha=175, max.colour.value=255),
-                lwd=comp.line.width
-            )
-        }
-
-        # Convert the MLE from days to years.  Our definition of a "year" is simply
-        # 365 days (i.e. we ignored leap years).
-        legend.captions <- c(
-            "observed",
-            "no decay",
-            expression(paste(t[1/2], " = 140 mo")),
-            expression(paste(t[1/2], " = 44 mo")),
-            substitute(
-                paste(
-                    "best-fit ",
-                    t[1/2],
-                    " = ",
-                    best.fit.decay,
-                    " years",
-                    sep=""
-                ),
-                list(
-                    best.fit.decay=round(mle / 365, digits=2)
-                )
-            ),
-            paste0(
-                "(95% CI [", 
-                round(lower.bound / 365, digits=2), 
-                ", ", 
-                round(upper.bound / 365, digits=2), 
-                "))"
-            ),
-            paste0("BF = ", format(bayes.factor, digits=3, scientific=0))
-        )
-        legend.colours <- c(
-            "blue",
-            "orange",
-            "grey",
-            "black",
-            "green",
-            "black",  # this should be ignored
-            "black"  # as should this
-        )
-        legend.line.types <- c(
-            "solid",
-            "solid",
-            "solid",
-            "dotdash",
-            "solid",
-            NA,
-            NA
-        )
-        legend.line.widths <- c(20, comp.line.width, comp.line.width, comp.line.width, comp.line.width, 0, 0)
         legend.location <- "topleft"
         if (subject == "p3") {
+            x.label <- "Year prior to last viremic episode"
             legend.location <- "topright"
         }
 
-        if (bayes.factor >= 1) {
-            legend.coords <- legend(
-                legend.location,
-                legend=legend.captions,
-                col=legend.colours,
-                lty=legend.line.types,
-                lwd=legend.line.widths,
-                cex=1.5,
-                bty="n"
-            )
-        } else {
-            # We customize the legend for cases where no meaningful MLE was found.
-            p2.legend.indices <- c(1, 3, 4, 5, 7)
-            p2.captions <- legend.captions[p2.legend.indices]
-            p2.captions[4] <- "best fit (no decay)"
-
-            legend(
-                legend.location,
-                legend=p2.captions,
-                col=legend.colours[p2.legend.indices],
-                lty=legend.line.types[p2.legend.indices],
-                lwd=legend.line.widths[p2.legend.indices],
-                cex=1.5,
-                bty="n"
-            )
-        }
+        pdf(paste("composition_", subject, "_", regime, "_known_vl.pdf", sep=""))
+        composition.plot(
+            ode.solutions$bin.365[[subject]][[regime]]$bin.freqs,
+            curr.data$days.before.art,
+            days.pre.therapy,
+            mle.row$mle,
+            mle.row$lower.bound,
+            mle.row$upper.bound,
+            bayes.factor=bayes.factor,
+            best.fit.no.decay=bayes.factor < 1,
+            x.label=x.label,
+            legend.location=legend.location
+        )
         dev.off()
     }
 }

@@ -369,3 +369,19 @@ compute.bayes.factors <- function(
     }
     return(bayes.factors)
 }
+
+
+# We use this helper to compute the breakpoints for making the histograms of
+# "days before ART".  This makes sure that the breakpoints cover all of our 
+# values properly.
+compute.bin.breakpoints <- function(
+    days.before.art,  # a vector of integration dates, usually, in "days before ART"
+    days.pre.therapy,  # total number of days untreated
+    bin.size=365
+) {
+    breakpoints = seq(0, max(c(days.before.art, days.pre.therapy)), by=bin.size)
+    if (!(max(days.before.art) %in% breakpoints)) {
+        breakpoints = c(breakpoints, breakpoints[length(breakpoints)] + bin.size)
+    }
+    return(breakpoints)
+}

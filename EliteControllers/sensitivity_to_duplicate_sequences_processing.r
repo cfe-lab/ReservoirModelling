@@ -1,7 +1,7 @@
 # May 4, 2021: redoing the analysis of March 3 but with the viral load corrected.
 
 # This is commented out because we'll typically already have loaded the data.
-# load("full_analysis.RData")
+# load("full_analysis_ode.RData")
 
 source("analysis_helpers.r")
 
@@ -97,4 +97,5 @@ bayes.factors <- compute.bayes.factors(
     all.log.likelihoods
 )
 
+# Here, we save the whole kaboodle because we pared down the ODEs too.
 save.image("sensitivity_to_duplicate_sequences.RData")
