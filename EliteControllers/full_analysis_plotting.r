@@ -3,6 +3,8 @@
 # load("full_analysis.RData")
 library(plotrix)
 
+source("plotting_helpers.r")
+
 # Make plots of the decay rate estimates.
 gaps <- list()
 x.tick.marks <- list()

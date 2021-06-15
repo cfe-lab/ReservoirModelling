@@ -2,6 +2,7 @@
 # load("p3_no_special_handling_analysis.RData")
 library(plotrix)
 
+source("plotting_helpers.r")
 
 regimes <- names(all.log.likelihoods$p3)
 for (regime in regimes) {
