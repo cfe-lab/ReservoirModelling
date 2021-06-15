@@ -3,7 +3,7 @@
 # no duplicate proviruses in the integration dates
 # special handling for p3
 
-load("full_analysis_ode.RData")
+# load("full_analysis_ode.RData")
 
 source("analysis_helpers.r")
 
