@@ -266,10 +266,10 @@ composition.plot <- function(
 
     legend(
         legend.location,
-        legend=p2.captions,
-        col=legend.colours[p2.legend.indices],
-        lty=legend.line.types[p2.legend.indices],
-        lwd=legend.line.widths[p2.legend.indices],
+        legend=legend.captions,
+        col=legend.colours,
+        lty=legend.line.types,
+        lwd=legend.line.widths,
         cex=1.5,
         bty="n"
     )
