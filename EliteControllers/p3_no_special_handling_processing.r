@@ -98,5 +98,4 @@ bayes.factors <- compute.bayes.factors(
     all.log.likelihoods
 )
 
-# Save the whole kaboodle as we pared down the ODEs too.
 save.image("p3_no_special_handling_analysis.RData")
