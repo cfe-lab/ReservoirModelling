@@ -21,8 +21,8 @@ ll.plot <- function(
         ylab=NA,
         cex.lab=3,
         cex.axis=2,
-        xtics=x.tick.marks[[subject]][[regime]],
-        xticlab=x.tick.marks[[subject]][[regime]]
+        xtics=x.tick.marks,
+        xticlab=x.tick.marks
     )
     axis.break(1, plot.gap[1], breakcol="snow", style="gap")
     axis.break(1, plot.gap[1] * (1.02), breakcol="black", style="slash")
