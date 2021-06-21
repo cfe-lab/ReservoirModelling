@@ -1,8 +1,8 @@
 # This analysis is:
 # p3 only
 # no special handling on P3's integration dates
-# no duplicate proviruses
-# We have to start from scratch so that we can redo the ODE with the un-adjusted 
+# including duplicate proviruses
+# We have to start from scratch so that we can redo the ODE with the un-adjusted VLs.
 
 source("analysis_helpers.r")
 
@@ -98,4 +98,4 @@ bayes.factors <- compute.bayes.factors(
     all.log.likelihoods
 )
 
-save.image("p3_no_special_handling_analysis.RData")
+save.image("p3_no_special_handling_including_duplicates_analysis.RData")
