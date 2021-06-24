@@ -366,17 +366,11 @@ model.free.plot <- function(
     x.se <- decay.rate.summary$coefficients[2, 2]
     
     # t_{1/2} = - log(2) / x.coef
-    half.life <- - log(2) / x.coef
-    half.life.upper <- "\u221e"
-    if (x.coef + 1.96 * x.se < 0) {
-        half.life.upper <- round(- log(2) / (x.coef + 1.96 * x.se), digits=2)
-    }
-    half.life.lower <- - log(2) / (x.coef - 1.96 * x.se)
-
-    text(
-        x=0,
-        y=max.y * 0.90,
-        label=substitute(
+    # If the denominator is positive, then that means we aren't actually seeing decay.
+    half.life.label <- ""
+    if (x.coef < 0) {
+        half.life <- - log(2) / x.coef
+        half.life.label <- substitute(
             paste(
                 t[1/2],
                 " = ",
@@ -385,22 +379,47 @@ model.free.plot <- function(
                 sep=""
             ),
             list(half.life.formatted=round(half.life, digits=2))
-        ),
+        )
+    } else {
+        half.life.label <- expression(
+            paste(
+                "No decay exhibited (",
+                t[1/2],
+                " = ",
+                infinity,
+                ")",
+                sep=""
+            )
+        )
+    }
+    text(
+        x=0,
+        y=max.y * 0.90,
+        label=half.life.label,
         pos=4,
         cex=2
     )
 
-    text(
-        x=0,
-        y=max.y * 0.825,
-        label=paste0(
-            "(95% CI (",
-            round(half.life.lower, digits=2),
-            ", ",
-            half.life.upper,  # we either already rounded it, or it's the infinity symbol
-            "))"
-        ),
-        pos=4,
-        cex=2
-    )
+    # If the lower bound for the half-life isn't infinity, we plot the confidence interval.
+    if (x.coef - 1.96 * x.se < 0) {
+        half.life.lower <- - log(2) / (x.coef - 1.96 * x.se)
+        half.life.upper <- "\u221e"
+        if (x.coef + 1.96 * x.se < 0) {
+            half.life.upper <- round(- log(2) / (x.coef + 1.96 * x.se), digits=2)
+        }
+
+        text(
+            x=0,
+            y=max.y * 0.825,
+            label=paste0(
+                "(95% CI (",
+                round(half.life.lower, digits=2),
+                ", ",
+                half.life.upper,  # we either already rounded it, or it's the infinity symbol
+                "))"
+            ),
+            pos=4,
+            cex=2
+        )
+    }
 }
