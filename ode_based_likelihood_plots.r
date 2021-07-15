@@ -53,7 +53,7 @@ for (vl.info in c("known", "typical")) {
                 sep=""
             )
 
-            pdf(paste(pid, "_", col.date,  "_", vl.info, "_vl.pdf", sep=""))
+            pdf(paste("lls_", pid, "_", col.date,  "_", vl.info, "_vl.pdf", sep=""))
             plot.log.likelihoods(
                 lls,
                 possible.half.lives,
