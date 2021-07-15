@@ -244,7 +244,7 @@ plot.half.lives <- function(
 
     text(
         x=(left.top.untreated.area + right.top.untreated.area) / 2,
-        y=18.5,
+        y=18.75,
         # labels="untreated infection",
         labels="untreated",
         cex=2
@@ -252,7 +252,7 @@ plot.half.lives <- function(
 
     text(
         x=max(row.to.x) + 3,
-        y=18.5,
+        y=18.75,
         # labels="on ART",
         labels="ART",
         cex=2
