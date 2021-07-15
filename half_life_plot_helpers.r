@@ -237,7 +237,7 @@ plot.half.lives <- function(
         y0=dna.half.life,
         y1=inf.arrow.y,
         angle=30,
-        length=0.25,
+        length=0.125,
         code=2,
         lwd=1
     )
