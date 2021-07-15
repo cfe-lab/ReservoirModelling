@@ -134,7 +134,7 @@ plot(
 )
 
 col.p <- col2rgb("pink")
-productive.col <- rgb(col.p[1], col.p[2], col.p[3], alpha=127, maxColorValue=255)
+productive.col <- rgb(col.p[1], col.p[2], col.p[3], alpha=255, maxColorValue=255)
 col.u <- col2rgb("red")
 unproductive.col <- rgb(col.u[1], col.u[2], col.u[3], alpha=127, maxColorValue=255)
 
@@ -217,7 +217,7 @@ plot(
 )
 
 col.p <- col2rgb("turquoise")
-productive.col <- rgb(col.p[1], col.p[2], col.p[3], alpha=127, maxColorValue=255)
+productive.col <- rgb(col.p[1], col.p[2], col.p[3], alpha=255, maxColorValue=255)
 col.u <- col2rgb("blue")
 unproductive.col <- rgb(col.u[1], col.u[2], col.u[3], alpha=127, maxColorValue=255)
 

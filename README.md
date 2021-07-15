@@ -51,7 +51,7 @@ This produces the plots of "typical pVL curves" where ART is initiated after eit
 3 years or 7 years of infection, along with corresponding plots of the reservoir
 composition in each of these settings.
 
-### `particpant_vl_vs_typical.r`
+### `participant_vl_vs_typical.r`
 
 This produces plots of each individual's pVL curve with the "typical" curve overlaid.
 
