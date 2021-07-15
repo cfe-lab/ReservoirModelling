@@ -43,10 +43,7 @@ produce an `.RData` file that contains all of the variables defined in the
 script; this is so that you can later load this file to do other analyses
 rather than having to rerun the dynamical system simulation.
 
-To perform these analyses, first either run this script in an interactive
-R console using `source()` to set up all the variables needed for subsequent
-analyses, or if you've already done this then you can simply load the `.RData`
-file it produced.  The various follow-up analyses that build on this script are:
+The various follow-up analyses that build on these results are:
 
 ### `typical_pvl_demonstration_plots.r`
 
