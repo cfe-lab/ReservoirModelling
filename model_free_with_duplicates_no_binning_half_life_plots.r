@@ -39,7 +39,8 @@ for (pid in unique(integration.data$pid)) {
 
         curr.mfr <- model.free.regression(
             curr.data$days.before.art,
-            bp.days
+            bp.days,
+            bucket.label.use.right.endpoint=FALSE
         )
         all.regressions[[pid]][[col.date]] <- curr.mfr
 
@@ -76,7 +77,7 @@ for (pid in unique(integration.data$pid)) {
             bp.years,
             curr.data,
             pid,
-            glm.scale=365
+            fitted.by.day=TRUE
         )
         dev.off()
     }

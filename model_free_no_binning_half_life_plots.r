@@ -37,7 +37,8 @@ for (pid in unique(integration.data$pid)) {
 
         curr.mfr <- model.free.regression(
             curr.data$days.before.art,
-            bp.days
+            bp.days,
+            bucket.label.use.right.endpoint=FALSE
         )
         all.regressions[[pid]][[col.date]] <- curr.mfr
 
@@ -60,6 +61,17 @@ for (pid in unique(integration.data$pid)) {
             bp.years = c(bp.years, bp.years[length(bp.years)] + 365)
         }
 
+        # Some special tweaking for a few specific plots.
+        x.text.offset <- 0
+        y.text.offset <- 0
+        if (pid == "Z1124F") {
+            x.text.offset <- 2.25
+        } else if (pid == "Z2006M") {
+            y.text.offset <- 0.15
+        } else if (pid == "Z634F" && col.date == "2011-05-18") {
+            y.text.offset <- 0.2
+        }
+
         cairo_pdf(
             paste0(
                 "model_free_no_binning_decay_rate_", 
@@ -74,7 +86,9 @@ for (pid in unique(integration.data$pid)) {
             bp.years,
             curr.data,
             pid,
-            glm.scale=365
+            fitted.by.day=TRUE,
+            x.text.offset=x.text.offset,
+            y.text.offset=y.text.offset
         )
         dev.off()
     }

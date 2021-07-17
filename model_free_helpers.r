@@ -1,11 +1,26 @@
-model.free.regression <- function (days.before.art, breakpoints) {
+# Perform the model-free regression.
+# The bucket.label.use.left.endpoint parameter determines whether
+# we label a bucket by its right endpoint or its left.
+# When we bin by year, we will label it by the right endpoint,
+# but when we bin by day we'll label it by the left.
+model.free.regression <- function (
+    days.before.art,
+    breakpoints,
+    bucket.label.use.right.endpoint=TRUE
+) {
     actual.freqs <- hist(
-        curr.data$days.before.art,
+        days.before.art,
         breaks=breakpoints,
-        plot=FALSE
-    )        
+        plot=FALSE,
+        right=bucket.label.use.right.endpoint
+    )
+    bucket.labels <- 1:length(actual.freqs$counts)
+    if (!bucket.label.use.right.endpoint) {
+        bucket.labels <- bucket.labels - 1
+    }
+
     regression.frame <- data.frame(
-        x=1:length(actual.freqs$counts),
+        x=bucket.labels,
         y=actual.freqs$counts
     )
     return(
@@ -56,7 +71,9 @@ model.free.decay.plot <- function(
     breakpoints,
     integration.data,
     pid,
-    glm.scale=1,  # set this to 365 if the fit was using data binned by day
+    fitted.by.day=FALSE,
+    x.text.offset=0,  # this is in plot units, measured from 0 on the x-axis
+    y.text.offset=0,  # this is also in plot units, measured from the *top* of the plot
     art.1.colour=default.art.1.colour,
     art.2.colour=default.art.2.colour
 ) {
@@ -167,7 +184,24 @@ model.free.decay.plot <- function(
     }
 
     # Overlay the GLM fitted value and error bars.
+    glm.scale <- 1
+    if (fitted.by.day) {
+        glm.scale <- 365
+    }
+
+    # Some special handling when the data is binned by day; because the data is 
+    # ordinarily binned by year and we show each bin in the "middle of a year"
+    # on the x-axis, it ordinarily makes sense to line up the fitted values 
+    # "on the year" in the middle of each "bucket".  For the binning-by-day, 
+    # there isn't any great way to show it but we show it so that the "bars" continue
+    # to represent "middle of the year".
+
     x.fit.values <- data.frame(x=seq(0.5, length(actual.freqs$counts) + 0.5, by=0.1))
+    plot.x.coords <- rev(x.fit.values$x) - 0.5
+    if (fitted.by.day) {
+        x.fit.values$x <- x.fit.values$x - 0.5
+        plot.x.coords <- rev(x.fit.values$x)
+    }
     fit <- predict(decay.rate.regression, newdata=x.fit.values * glm.scale, se.fit=TRUE)
 
     predictions <- exp(fit$fit)
@@ -175,20 +209,20 @@ model.free.decay.plot <- function(
     lower.bounds <- exp(fit$fit - 1.96 * fit$se.fit)
 
     lines(
-        rev(x.fit.values$x) - 0.5,
+        plot.x.coords,
         glm.scale * predictions / total.count,
         lwd=4,
         col="red"
     )
     lines(
-        rev(x.fit.values$x) - 0.5,
+        plot.x.coords,
         glm.scale * upper.bounds / total.count,
         lty=2,
         lwd=2,
         col="red"
     )
     lines(
-        rev(x.fit.values$x) - 0.5,
+        plot.x.coords,
         glm.scale * lower.bounds / total.count,
         lty=2,
         lwd=2,
@@ -206,16 +240,16 @@ model.free.decay.plot <- function(
     half.life.lower <- hl.df$lower.bound
 
     text(
-        x=0,
-        y=max.y * 0.96,
+        x=x.text.offset,
+        y=max.y * 0.96 - y.text.offset,
         label=pid,
         pos=4,
         cex=2
     )
 
     text(
-        x=0,
-        y=max.y * 0.87,
+        x=x.text.offset,
+        y=max.y * 0.87 - y.text.offset,
         label=substitute(
             paste(
                 t[1/2],
@@ -231,8 +265,8 @@ model.free.decay.plot <- function(
     )
 
     text(
-        x=0,
-        y=max.y * 0.795,
+        x=x.text.offset,
+        y=max.y * 0.795 - y.text.offset,
         label=paste(
             "(95% CI (",
             round(half.life.lower, digits=2),
