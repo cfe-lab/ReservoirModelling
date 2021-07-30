@@ -200,7 +200,7 @@ prepare.alternative.trees.integration.data <- function(subjects, vl.data, p3.bou
 prepare.lsd.integration.data <- function(subjects, vl.data, p3.boundaries) {
     paths <- list()
     data.dir <- "../../data/LSD_Proviral integration dates_21Jul2021"
-    for (subject in c("p1", "p2", "p3")) {
+    for (subject in subjects) {
         if (subject %in% c("p1", "p2", "p3")) {
             paths[[subject]] <- paste(
                 data.dir,
