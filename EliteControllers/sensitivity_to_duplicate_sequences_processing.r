@@ -52,7 +52,7 @@ all.log.likelihoods <- compute.lls(
 )
 
 mles <- compute.mles(
-    integration.data,
+    all.log.likelihoods,
     ode.solutions$bin.30,
     bin.size,
     possible.half.lives
