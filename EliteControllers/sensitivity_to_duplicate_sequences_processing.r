@@ -1,4 +1,8 @@
-# May 4, 2021: redoing the analysis of March 3 but with the viral load corrected.
+# This analysis uses:
+# - standard integration dates
+# - duplicate proviruses *included*
+# - Miura regime only
+# - special handling for P3's viral load data
 
 # This is commented out because we'll typically already have loaded the data.
 # load("full_analysis_ode.RData")
@@ -14,9 +18,9 @@ regimes <- "Miura"
 subjects <- c("p1", "p2", "p3", "p4")
 
 for (subject in subjects) {
-    all.subjects[[subject]][["min"]] <- NULL
-    all.subjects[[subject]][["median"]] <- NULL
-    all.subjects[[subject]][["max"]] <- NULL
+    vl.data[[subject]][["min"]] <- NULL
+    vl.data[[subject]][["median"]] <- NULL
+    vl.data[[subject]][["max"]] <- NULL
 }
 
 # The ODEs are unaffected by the different integration date data, but we
@@ -29,70 +33,33 @@ for (bin.size.label in c("bin.30", "bin.365")) {
     }
 }
 
-
-# Read in the sample time data, this time retaining the duplicates.
-for (subject in subjects) {
-    # Eliminate several columns we don't use.
-    subject.data <- read.csv(
-        paste(
-            "../../data/IntegrationData_2021_06_10", 
-            paste0(
-                subject,
-                "_integration.csv"
-            ),
-            sep="/"
-        )
-    )
-    subject.data <- subject.data[, c(1, 4, 5, 6, 7)]
-    names(subject.data) <- c(
-        "id",
-        "integration.date.est",
-        "integration.date.lower",
-        "integration.date.upper",
-        "duplicate"
-    )
-
-    for (col.idx in 2:4) {
-        subject.data[[col.idx]] <- strptime(subject.data[[col.idx]], "%Y-%m-%d")
-    }
-
-    if (subject != "p3") {
-        subject.data$days.before.art <- compute.days.before.art(
-            subject.data$integration.date.est,
-            all.subjects[[subject]]$art.initiation,
-            all.subjects[[subject]]$infection.date
-        )
-    } else {
-        subject.data$days.before.art <- compute.days.before.art(
-            subject.data$integration.date.est,
-            all.subjects[[subject]]$art.initiation,
-            all.subjects[[subject]]$infection.date,
-            boundaries=c(p3.art.initiation, p3.blip)
-        )
-    }
-    all.subjects[[subject]][["integration"]] <- subject.data
-}
+integration.data <- prepare.integration.data(
+    subjects,
+    vl.data,
+    remove.duplicates=FALSE,
+    p3.boundaries=c(p3.art.initiation, p3.blip)
+)
 
 
 # Find the decay rate that maximizes the likelihood for each individual.
 bin.size <- 30
 possible.half.lives <- (1:1800) * bin.size  # months, roughly
 all.log.likelihoods <- compute.lls(
-    all.subjects,
+    integration.data,
     ode.solutions$bin.30,
     bin.size=bin.size,
     possible.half.lives=possible.half.lives
 )
 
 mles <- compute.mles(
-    all.log.likelihoods,
+    integration.data,
     ode.solutions$bin.30,
     bin.size,
     possible.half.lives
 )
 
 bayes.factors <- compute.bayes.factors(
-    all.subjects,
+    integration.data,
     ode.solutions$bin.30,
     all.log.likelihoods
 )
