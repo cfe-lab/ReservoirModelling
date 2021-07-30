@@ -276,6 +276,8 @@ composition.plot <- function(
 }
 
 
+source("analysis_helpers.r")  # for model.free.half.life
+
 model.free.plot <- function(
     decay.rate.regression,
     actual.counts,  # plug in actual.freqs$counts
@@ -361,15 +363,10 @@ model.free.plot <- function(
     )
 
     # Add text listing the half life.
-    decay.rate.summary <- summary(decay.rate.regression)
-    x.coef <- decay.rate.summary$coefficients[2, 1]
-    x.se <- decay.rate.summary$coefficients[2, 2]
+    hl.list <- model.free.half.life(decay.rate.regression)
     
-    # t_{1/2} = - log(2) / x.coef
-    # If the denominator is positive, then that means we aren't actually seeing decay.
     half.life.label <- ""
-    if (x.coef < 0) {
-        half.life <- - log(2) / x.coef
+    if (!is.infinite(hl.list$half.life)) {
         half.life.label <- substitute(
             paste(
                 t[1/2],
@@ -378,7 +375,7 @@ model.free.plot <- function(
                 " yr",
                 sep=""
             ),
-            list(half.life.formatted=round(half.life, digits=2))
+            list(half.life.formatted=round(hl.list$half.life, digits=2))
         )
     } else {
         half.life.label <- expression(
@@ -401,11 +398,10 @@ model.free.plot <- function(
     )
 
     # If the lower bound for the half-life isn't infinity, we plot the confidence interval.
-    if (x.coef - 1.96 * x.se < 0) {
-        half.life.lower <- - log(2) / (x.coef - 1.96 * x.se)
+    if (!is.infinite(hl.list$lower.bound)) {
         half.life.upper <- "\u221e"
-        if (x.coef + 1.96 * x.se < 0) {
-            half.life.upper <- round(- log(2) / (x.coef + 1.96 * x.se), digits=2)
+        if (!is.infinite(hl.list$upper.bound)) {
+            half.life.upper <- round(hl.list$upper.bound, digits=2)
         }
 
         text(
@@ -413,7 +409,7 @@ model.free.plot <- function(
             y=max.y * 0.825,
             label=paste0(
                 "(95% CI (",
-                round(half.life.lower, digits=2),
+                round(hl.list$lower.bound, digits=2),
                 ", ",
                 half.life.upper,  # we either already rounded it, or it's the infinity symbol
                 "))"

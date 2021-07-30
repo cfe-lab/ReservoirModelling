@@ -46,11 +46,11 @@ for (subject in subjects) {
 
 # Plots of reservoir composition.
 for (subject in subjects) {
-    curr.data <- all.subjects[[subject]]$integration
+    curr.data <- integration.data[[subject]]
 
     days.pre.therapy <- 
         as.numeric(
-            all.subjects[[subject]]$art.initiation - all.subjects[[subject]]$infection.date,
+            vl.data[[subject]]$art.initiation - vl.data[[subject]]$infection.date,
             units="days"
         )
 

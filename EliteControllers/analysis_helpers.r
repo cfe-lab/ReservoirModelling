@@ -1,12 +1,38 @@
 source("../reservoir_helpers.r")
 
 
+# These constants are taken from the literature.
+acute.phase <- list()
+acute.phase[["min"]] <- list(
+    days.to.peak=14,
+    peak.vl=1954,
+    days.to.undetectable=6 * 7
+)
+acute.phase[["median"]] <- list(
+    days.to.peak=23,
+    peak.vl=12902,
+    days.to.undetectable=22 * 7
+)
+acute.phase[["max"]] <- list(
+    days.to.peak=30,
+    peak.vl=71550,
+    days.to.undetectable=43 * 7
+)
+acute.phase[["Miura"]] <- list(
+    days.to.peak=31,
+    peak.vl=53300,
+    days.to.undetectable=41
+)
+regimes <- names(acute.phase)
+subjects <- c("p1", "p2", "p3", "p4")
+
+
 # This helper loads the viral load data.
 prepare.vl.data <- function(
     subjects,
     p3.special.handling=TRUE
 ) {
-    all.subjects <- list()
+    vl.data <- list()
 
     # Some special dates that we will have to remember for p3.
     p3.art.initiation <- NULL
@@ -37,7 +63,7 @@ prepare.vl.data <- function(
             vl.csv$viral.load[undetectable.before.blip] <- 0
         }
 
-        all.subjects[[subject]] <- list(
+        vl.data[[subject]] <- list(
             vl=vl.csv,
             infection.date=infection.date,
             art.initiation=art.initiation
@@ -46,9 +72,200 @@ prepare.vl.data <- function(
 
     return(
         list(
-            all.subjects=all.subjects,
+            vl.data=vl.data,
             p3.art.initiation=p3.art.initiation,
             p3.blip=p3.blip
+        )
+    )
+}
+
+
+prepare.integration.data.helper <- function(
+    subjects,  # which subjects to prepare data for
+    paths,  # a list keyed by subject with the paths to the files to use
+    vl.data,
+    date.columns,  # indices *before reducing to useful columns* of columns which should be converted to dates
+    useful.column.indices,  # which columns to retain
+    useful.column.names,  # what to rename these remaining columns
+    p3.boundaries=NULL  # specify this if you want special handling of P3's VL data
+) {
+    integration.data <- list()
+    for (subject in subjects) {
+        subject.data <- read.csv(paths[[subject]])
+
+        for (col.idx in date.columns) {
+            subject.data[[col.idx]] <- strptime(subject.data[[col.idx]], "%Y-%m-%d")
+        }
+
+        subject.data <- subject.data[, useful.column.indices]
+        names(subject.data) <- useful.column.names
+
+        if (subject != "p3" || is.null(p3.boundaries)) {
+            subject.data$days.before.art <- compute.days.before.art(
+                subject.data$integration.date.est,
+                vl.data[[subject]]$art.initiation,
+                vl.data[[subject]]$infection.date
+            )
+        } else {
+            subject.data$days.before.art <- compute.days.before.art(
+                subject.data$integration.date.est,
+                vl.data[[subject]]$art.initiation,
+                vl.data[[subject]]$infection.date,
+                boundaries=p3.boundaries
+            )
+        }
+        integration.data[[subject]] <- subject.data
+    }
+    return(integration.data)
+}
+
+
+prepare.integration.data <- function(
+    subjects,
+    vl.data,
+    remove.duplicates,
+    p3.boundaries
+) {
+    paths <- list()
+    for (subject in subjects) {
+        paths[[subject]] <- paste(
+            "../../data/IntegrationData_2021_06_10",
+            paste0(
+                subject,
+                "_integration.csv"
+            ),
+            sep="/"
+        )
+    }
+
+    integration.data <- prepare.integration.data.helper(
+        subjects,
+        paths,
+        vl.data,
+        4:6,
+        c(1, 4, 5, 6, 7),
+        c(
+            "id",
+            "integration.date.est",
+            "integration.date.lower",
+            "integration.date.upper",
+            "duplicate"
+        ),
+        p3.boundaries
+    )
+
+    if (remove.duplicates) {
+        for (subject in subjects) {
+            subject.data <- integration.data[[subject]]
+            integration.data[[subject]] <- subject.data[is.na(subject.data$duplicate),]
+        }
+    }
+
+    return(integration.data)
+}
+
+
+prepare.alternative.trees.integration.data <- function(subjects, vl.data, p3.boundaries) {
+    paths <- list()
+    for (subject in subjects) {
+        paths[[subject]] <- paste(
+            "../../data/Alternative trees_proviral integration dates_21Jul2021",
+            paste0(
+                subject,
+                "_alt_reservoir integration dates_21Jul2021.csv"
+            ),
+            sep="/"
+        )
+    }
+
+    return(
+        prepare.integration.data.helper(
+            subjects,
+            paths,
+            vl.data,
+            4:6,
+            c(1, 4, 5, 6),
+            c(
+                "id",
+                "integration.date.est",
+                "integration.date.lower",
+                "integration.date.upper"
+            ),
+            p3.boundaries
+        )
+    )
+}
+
+
+prepare.lsd.integration.data <- function(subjects, vl.data, p3.boundaries) {
+    paths <- list()
+    data.dir <- "../../data/LSD_Proviral integration dates_21Jul2021"
+    for (subject in c("p1", "p2", "p3")) {
+        if (subject %in% c("p1", "p2", "p3")) {
+            paths[[subject]] <- paste(
+                data.dir,
+                paste0(
+                    subject,
+                    "_LSD_proviral integration dates_21Jul2021.csv"
+                ),
+                sep="/"
+            )
+        } else {  # subject == "p4"
+            paths[[subject]] <- paste(
+                data.dir,
+                paste0(
+                    subject,
+                    "_LSD_proviral integration dates_22Jul2021.csv"
+                ),
+                sep="/"
+            )
+        }
+    }
+
+    return(
+        prepare.integration.data.helper(
+            subjects,
+            paths,
+            vl.data,
+            4:6,
+            c(1, 4, 5, 6),
+            c(
+                "id",
+                "integration.date.est",
+                "integration.date.lower",
+                "integration.date.upper"
+            ),
+            p3.boundaries
+        )
+    )
+}
+
+
+prepare.nearest.neighbour.integration.data <- function(subjects, vl.data) {
+    paths <- list()
+    for (subject in subjects) {
+        paths[[subject]] <- paste(
+            "../../data/NearestNeighbourEstimation_2021_06_08", 
+            paste0(
+                subject,
+                "_integration.csv"
+            ),
+            sep="/"
+        )
+    }
+
+    # These files have two useful columns (the first and second):
+    # PBMC ID
+    # NN Year (which is actually a date in YYYY-MM-DD format)
+    return(
+        prepare.integration.data.helper(
+            subjects,
+            paths,
+            vl.data,
+            2,  # convert the 2nd column to a date
+            1:2,  # retain only the first two columns
+            c("id", "integration.date.est"),
+            NULL  # no special handling of P3's integration dates
         )
     )
 }
@@ -110,16 +327,16 @@ compute.days.before.art <- function(
 
 
 graft.acute.phase <- function(
-    all.subjects,
+    vl.data,
     acute.phase,
     acute.setpoint=1000
 ) {
-    subjects <- names(all.subjects)
+    subjects <- names(vl.data)
     regimes <- names(acute.phase)
     grafted.vls <- list()
     for (subject in subjects) {
-        vl <- all.subjects[[subject]]$vl
-        infection.date <- all.subjects[[subject]]$infection.date
+        vl <- vl.data[[subject]]$vl
+        infection.date <- vl.data[[subject]]$infection.date
 
         # Convert all dates to days relative to the (estimated) infection date.
         time <- as.numeric(vl$date - infection.date, units="days")
@@ -179,14 +396,14 @@ graft.acute.phase <- function(
 }
 
 
-solve.odes <- function(all.subjects, grafted.vls) {
+solve.odes <- function(vl.data, grafted.vls) {
     require(deSolve)
 
     ode.solutions.bin.30 <- list()
     ode.solutions.bin.365 <- list()
     subjects <- names(grafted.vls)
     for (subject in subjects) {
-        curr <- all.subjects[[subject]]
+        curr <- vl.data[[subject]]
         infection.date <- curr[["infection.date"]]
         art.initiation <- curr[["art.initiation"]]
 
@@ -227,7 +444,7 @@ solve.odes <- function(all.subjects, grafted.vls) {
 
 
 compute.lls <- function(
-    all.subjects,
+    integration.data,
     ode.solutions.bin.30,
     bin.size=30,  # months, roughly
     possible.half.lives=(1:1800) * 30,
@@ -237,10 +454,10 @@ compute.lls <- function(
     require(parallel)
     all.log.likelihoods <- list()  # this will be triply-indexed by pid, regime, and collection date
 
-    subjects <- names(all.subjects)
+    subjects <- names(integration.data)
     for (subject in subjects) {
         all.log.likelihoods[[subject]] <- list()
-        curr.data <- all.subjects[[subject]]$integration
+        curr.data <- integration.data[[subject]]
 
         regimes <- names(ode.solutions.bin.30[[subject]])
         for (regime in regimes) {
@@ -333,16 +550,16 @@ compute.mles <- function(
 
 
 compute.bayes.factors <- function(
-    all.subjects,
+    integration.data,
     ode.solutions.bin.30,
     all.log.likelihoods
 ) {
     bayes.factors <- NULL
-    subjects <- names(all.subjects)
+    subjects <- names(integration.data)
     for (subject in subjects) {
         regimes <- names(ode.solutions.bin.30[[subject]])
         for (regime in regimes) {
-            curr.data <- all.subjects[[subject]]$integration
+            curr.data <- integration.data[[subject]]
             reservoir.dist <- ode.solutions$bin.30[[subject]][[regime]]
 
             no.decay.ll.no.factorial <- log.likelihood.no.factorial(
@@ -384,4 +601,78 @@ compute.bin.breakpoints <- function(
         breakpoints = c(breakpoints, breakpoints[length(breakpoints)] + bin.size)
     }
     return(breakpoints)
+}
+
+
+# This helper performs the GLM regression needed for our model-free estimates.
+compute.model.free.estimate <- function(
+    days.before.art,
+    infection.date,
+    art.initiation,
+    bin.size=365
+) {
+    days.pre.therapy <- 
+        as.numeric(
+            art.initiation - infection.date,
+            units="days"
+        )
+
+    breakpoints <- compute.bin.breakpoints(
+        days.before.art,
+        days.pre.therapy,
+        bin.size=bin.size
+    )
+    actual.freqs <- hist(
+        days.before.art,
+        breaks=breakpoints,
+        plot=FALSE
+    )
+    regression.frame <- data.frame(
+        x=1:length(actual.freqs$counts),
+        y=actual.freqs$counts
+    )
+    decay.rate.regression <- glm(
+        y ~ x,
+        family=poisson,
+        data=regression.frame
+    )
+
+    return(
+        list(
+            decay.rate.regression=decay.rate.regression,
+            actual.freqs=actual.freqs
+        )
+    )
+}
+
+
+model.free.half.life <- function(decay.rate.regression) {
+    decay.rate.summary <- summary(decay.rate.regression)
+    x.coef <- decay.rate.summary$coefficients[2, 1]
+    x.se <- decay.rate.summary$coefficients[2, 2]
+
+    half.life <- Inf
+    if (x.coef < 0) {
+        half.life <- - log(2) / x.coef
+    }
+
+    lower.bound <- Inf
+    lower.bound.denom <- x.coef - 1.96 * x.se
+    if (lower.bound.denom < 0) {
+        lower.bound <- - log(2) / lower.bound.denom
+    }
+
+    upper.bound <- Inf
+    upper.bound.denom <- x.coef + 1.96 * x.se
+    if (upper.bound.denom < 0) {
+        upper.bound <- - log(2) / upper.bound.denom
+    }
+    
+    return(
+        list(
+            half.life=half.life,
+            lower.bound=lower.bound,
+            upper.bound=upper.bound
+        )
+    )
 }

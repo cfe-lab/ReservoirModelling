@@ -1,5 +1,9 @@
-# This is commented out as we will often have already loaded it when we run this script.
-# load("p3_no_special_handling_analysis.RData")
+# This is commented out as we will often have already done this stuff when we run this script.
+# load("p3_no_special_handling_ode.RData")
+# source("p3_no_special_handling_no_duplicates_processing.r")
+# OR
+# source("p3_no_special_handling_include_duplicates_processing.r")
+
 library(plotrix)
 
 source("plot_helpers.r")
@@ -22,10 +26,10 @@ for (regime in regimes) {
 }
 
 
-curr.data <- all.subjects[["p3"]]$integration
+curr.data <- integration.data[["p3"]]
 days.pre.therapy <- 
     as.numeric(
-        all.subjects[["p3"]]$art.initiation - all.subjects[["p3"]]$infection.date,
+        vl.data[["p3"]]$art.initiation - vl.data[["p3"]]$infection.date,
         units="days"
     )
 
