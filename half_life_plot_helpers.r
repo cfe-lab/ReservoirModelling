@@ -11,7 +11,10 @@ plot.half.lives <- function(
     show.legend=FALSE,
     art.1.colour=default.art.1.colour,
     art.2.colour=default.art.2.colour,
-    alpha=default.alpha
+    alpha=default.alpha,
+    max.y=20,  # the upper extent of the y-axis
+    inf.arrow.y=17,  # the y-value to which "infinite" arrows will extend
+    text.label.y=18.75  # the y-value that the "untreated" and "ART" text appears at
 ) {
     # Our colour scheme for reservoir sampling points.
     alpha <- as.integer(0.7 * 255)
@@ -42,11 +45,6 @@ plot.half.lives <- function(
             curr.row.idx <- curr.row.idx + 1
         }
     }
-
-    # Define the upper extent of the y-axis, and the y-value to which "infinite" arrows
-    # will extend.
-    max.y <- 20
-    inf.arrow.y <- 17
 
     par(mar=c(11.5, 6.5, 2, 2) + 0.1)
     plot(
@@ -244,7 +242,7 @@ plot.half.lives <- function(
 
     text(
         x=(left.top.untreated.area + right.top.untreated.area) / 2,
-        y=18.75,
+        y=text.label.y,
         # labels="untreated infection",
         labels="untreated",
         cex=2
@@ -252,7 +250,7 @@ plot.half.lives <- function(
 
     text(
         x=max(row.to.x) + 3,
-        y=18.75,
+        y=text.label.y,
         # labels="on ART",
         labels="ART",
         cex=2
