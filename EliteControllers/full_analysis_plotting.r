@@ -79,7 +79,7 @@ for (subject in subjects) {
             mle.row$mle,
             mle.row$lower.bound,
             mle.row$upper.bound,
-            bayes.factor=bayes.factor,
+            bayes.factor=NA,
             best.fit.no.decay=bayes.factor < 1,
             x.label=x.label,
             legend.location=legend.location
